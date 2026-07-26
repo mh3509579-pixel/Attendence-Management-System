@@ -588,6 +588,9 @@
     function loadStudents() {
       try { return JSON.parse(localStorage.getItem('studentsData')) || []; } catch(e) { return []; }
     }
+    function loadTrainers() {
+      try { return JSON.parse(localStorage.getItem('trainersData')) || []; } catch(e) { return []; }
+    }
 
     // ============================================================
     // TOAST
@@ -651,6 +654,7 @@
       var trainers = {};
       slots.forEach(function(s) { if (s.trainer) trainers[s.trainer] = true; });
       classes.forEach(function(c) { if (c.trainer) trainers[c.trainer] = true; });
+      loadTrainers().forEach(function(t) { if (t.name) trainers[t.name] = true; });
 
       var trainerSelect = document.getElementById('inputTrainer');
       trainerSelect.innerHTML = '<option value="">Select Trainer</option>';
@@ -714,6 +718,7 @@
       classes.forEach(function(c) {
         if (c.name) classNames[c.name] = true;
       });
+      loadTrainers().forEach(function(t) { if (t.name) trainers[t.name] = true; });
 
       var subjectOpts = []; for (var k in subjects) subjectOpts.push({ value: k, label: k });
       repopulate('filterSubject', subjectOpts, 'Classes');

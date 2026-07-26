@@ -275,69 +275,93 @@
 
   <!-- Modal Overlay -->
   <div id="modalOverlay" class="modal-overlay">
-    <div class="modal-box">
-      <div class="bg-[#D8E6FE] rounded-xl px-4 py-3 flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
-          </svg>
-          <p class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Create New Class</p>
+    <div class="modal-box" id="modalBox">
+      <!-- Create Mode -->
+      <div id="createMode">
+        <div class="bg-[#D8E6FE] rounded-xl px-4 py-3 flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            <p class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Create New Class</p>
+          </div>
+          <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+            <svg class="w-4 h-4 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
-        <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
-          <svg class="w-4 h-4 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Class Name</label>
+            <input id="inputClassName" type="text" placeholder="e.g. Web Development" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Total Students</label>
+            <input id="inputTotalStudents" type="number" placeholder="e.g. 25" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Time</label>
+            <input id="inputTime" type="text" placeholder="e.g. 10:00 AM - 12:00 PM" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Day</label>
+            <input id="inputDay" type="text" placeholder="e.g. Monday, Wednesday" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Session</label>
+            <input id="inputSession" type="text" placeholder="e.g. Session 03" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Gender</label>
+            <select id="inputGender" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Mixed">Mixed</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Trainer</label>
+            <input id="inputTrainer" type="text" placeholder="e.g. John Doe" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Room</label>
+            <input id="inputRoom" type="text" placeholder="e.g. Room 204" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+        </div>
+        <button id="createClassBtn" class="w-full mt-6 bg-[#131212] text-white py-3 rounded-full text-sm font-semibold hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">Create Class</button>
       </div>
-
-      <div class="flex flex-col gap-4">
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Class Name</label>
-          <input id="inputClassName" type="text" placeholder="e.g. Web Development" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+      <!-- Confirm Delete Mode -->
+      <div id="deleteMode" style="display:none">
+        <div class="bg-red-50 rounded-xl px-4 py-3 flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            <p class="text-lg font-bold text-red-800" style="font-family: 'Ibarra Real Nova', serif">Delete Class</p>
+          </div>
+          <button id="closeDeleteModalBtn" class="w-8 h-8 rounded-full bg-red-200 flex items-center justify-center hover:bg-red-300 transition-all cursor-pointer">
+            <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Total Students</label>
-          <input id="inputTotalStudents" type="number" placeholder="e.g. 25" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        <div class="text-center py-4">
+          <p id="deleteMsg" class="text-base font-semibold text-black mb-2" style="font-family:'Inter',sans-serif">Delete this class?</p>
+          <p class="text-sm text-black/50" style="font-family:'Inter',sans-serif">All students, timetable slots, and attendance records for this class will also be removed.</p>
         </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Time</label>
-          <input id="inputTime" type="text" placeholder="e.g. 10:00 AM - 12:00 PM" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Day</label>
-          <input id="inputDay" type="text" placeholder="e.g. Monday, Wednesday" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Session</label>
-          <input id="inputSession" type="text" placeholder="e.g. Session 03" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Gender</label>
-          <select id="inputGender" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif">
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Mixed">Mixed</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Trainer</label>
-          <input id="inputTrainer" type="text" placeholder="e.g. John Doe" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Room</label>
-          <input id="inputRoom" type="text" placeholder="e.g. Room 204" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        <div class="flex gap-3 mt-4">
+          <button id="cancelDeleteBtn" class="flex-1 py-3 rounded-full border border-black/10 text-sm font-medium text-black/70 hover:bg-black/5 transition-all cursor-pointer" style="font-family:'Inter',sans-serif">Cancel</button>
+          <button id="confirmDeleteBtn" class="flex-1 py-3 rounded-full bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all cursor-pointer" style="font-family:'Inter',sans-serif">Delete</button>
         </div>
       </div>
-
-      <button id="createClassBtn" class="w-full mt-6 bg-[#131212] text-white py-3 rounded-full text-sm font-semibold hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">
-        Create Class
-      </button>
     </div>
   </div>
 
   <script>
     var CLASSES_KEY = 'classesData';
+    var deleteTarget = null;
 
     function loadClasses() {
       try { return JSON.parse(localStorage.getItem(CLASSES_KEY)) || []; } catch(e) { return []; }
@@ -347,12 +371,17 @@
       localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
     }
 
+    function esc(str){ var d=document.createElement('div'); d.appendChild(document.createTextNode(str)); return d.innerHTML; }
+
     function renderClassCard(cls) {
       var card = document.createElement('div');
-      card.className = 'bg-[#D8E6FE] rounded-[16px] p-3 shadow-sm border border-black/5';
+      card.className = 'bg-[#D8E6FE] rounded-[16px] p-3 shadow-sm border border-black/5 relative';
       card.setAttribute('data-name', cls.name.toLowerCase());
       card.innerHTML =
-        '<div class="flex items-start justify-between mb-3">' +
+        '<button class="delete-class-btn absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/40 transition-all cursor-pointer" data-class="'+esc(cls.name)+'">' +
+          '<svg class="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+        '</button>' +
+        '<div class="flex items-start justify-between mb-3 pr-6">' +
           '<p class="text-base font-bold text-black" style="font-family: \'Ibarra Real Nova\', serif">' + cls.name + '</p>' +
           '<span class="text-xs font-semibold px-3 py-1 rounded-full bg-black/10 text-black/70" style="font-family: \'Inter\', sans-serif">' + cls.gender + '</span>' +
         '</div>' +
@@ -379,6 +408,38 @@
       classes.forEach(function(c) {
         container.appendChild(renderClassCard(c));
       });
+    }
+
+    function deleteClass(className) {
+      var classes = loadClasses();
+      var filtered = classes.filter(function(c){ return c.name !== className; });
+      saveClasses(filtered);
+
+      var students = []; try { students = JSON.parse(localStorage.getItem('studentsData')) || []; } catch(e){}
+      var filteredStudents = students.filter(function(s){ return (s.subject||s.class) !== className; });
+      localStorage.setItem('studentsData', JSON.stringify(filteredStudents));
+
+      var slots = []; try { slots = JSON.parse(localStorage.getItem('timetableData')) || []; } catch(e){}
+      var filteredSlots = slots.filter(function(s){ return s['class'] !== className; });
+      localStorage.setItem('timetableData', JSON.stringify(filteredSlots));
+
+      var sessions = []; try { sessions = JSON.parse(localStorage.getItem('attendanceSessions')) || []; } catch(e){}
+      var filteredSessions = sessions.filter(function(s){ return s.class !== className; });
+      localStorage.setItem('attendanceSessions', JSON.stringify(filteredSessions));
+
+      renderAllClasses();
+    }
+
+    function showCreateMode() {
+      document.getElementById('createMode').style.display = '';
+      document.getElementById('deleteMode').style.display = 'none';
+    }
+
+    function showDeleteMode(name) {
+      deleteTarget = name;
+      document.getElementById('deleteMsg').textContent = 'Delete "' + name + '" and all its data?';
+      document.getElementById('createMode').style.display = 'none';
+      document.getElementById('deleteMode').style.display = '';
     }
 
     var logoutBtn = document.getElementById('logoutBtn');
@@ -420,11 +481,28 @@
     var emptyPlaceholder = document.getElementById('emptyPlaceholder');
 
     addClassBtn.addEventListener('click', function () {
+      showCreateMode();
       modalOverlay.classList.add('show');
     });
 
     closeModalBtn.addEventListener('click', function () {
       modalOverlay.classList.remove('show');
+    });
+
+    document.getElementById('closeDeleteModalBtn').addEventListener('click', function () {
+      modalOverlay.classList.remove('show');
+    });
+
+    document.getElementById('cancelDeleteBtn').addEventListener('click', function () {
+      modalOverlay.classList.remove('show');
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+      if (deleteTarget) {
+        deleteClass(deleteTarget);
+        deleteTarget = null;
+        modalOverlay.classList.remove('show');
+      }
     });
 
     modalOverlay.addEventListener('click', function (e) {
@@ -473,6 +551,15 @@
       document.getElementById('inputGender').value = '';
 
       modalOverlay.classList.remove('show');
+    });
+
+    document.getElementById('classCardsContainer').addEventListener('click', function(e){
+      var btn = e.target.closest('.delete-class-btn');
+      if(btn){
+        var name = btn.getAttribute('data-class');
+        showDeleteMode(name);
+        modalOverlay.classList.add('show');
+      }
     });
 
     renderAllClasses();

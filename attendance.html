@@ -246,8 +246,8 @@ html { scroll-behavior:smooth; }
   </div>
 </div>
 
-<div class="card-soft p-0 overflow-hidden">
-  <div class="table-wrap">
+<div class="card-soft p-0" style="overflow:visible">
+  <div class="table-wrap" style="overflow-x:auto;max-width:100%">
     <table id="attTable" class="att-table">
       <thead id="attThead">
         <tr id="attHeaderRow">
@@ -305,8 +305,12 @@ function getDateStr(){ var d=new Date(); return d.toISOString().split('T')[0]; }
 function getDateForDay(dayName){ var dayMap={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6}; var target=dayMap[dayName]; if(target===undefined) return getDateStr(); var d=new Date(); var diff=target-d.getDay(); if(diff<0) diff+=7; d.setDate(d.getDate()+diff); return d.toISOString().split('T')[0]; }
 
 function getDisplaySessions(){
+  var DAY_ORDER={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
   return sessions.filter(function(s){
     return (currentDay==='all'||s.day===currentDay)&&(currentTime==='all'||s.time===currentTime)&&(currentClass==='all'||s.class===currentClass);
+  }).sort(function(a,b){
+    if(a.date!==b.date) return b.date.localeCompare(a.date);
+    return (DAY_ORDER[a.day]||0)-(DAY_ORDER[b.day]||0);
   });
 }
 
@@ -400,23 +404,10 @@ function toggleAttendanceSession(){
     var day=currentDay,time=currentTime;
     if(day==='all'||time==='all'){ alert('Please select a specific Day and Time from the filters first.'); return; }
     var blockDays=TIMETABLE_BLOCK_DAYS[day]; if(!blockDays){ alert('Invalid day block selected.'); return; }
-    var existing=blockDays.filter(function(bd){ return sessions.some(function(s){ return s.day===bd&&s.time===time&&s.class===currentClass; }); });
-    if(existing.length===blockDays.length){
-      attSessionActive=true;
-      document.getElementById('startAttBtn').innerHTML='<i class="fas fa-stop"></i> Stop Attendance';
-      document.getElementById('startAttBtn').className='attendance-btn danger';
-      document.getElementById('sessionBadge').className='session-badge active';
-      document.getElementById('sessionBadge').innerHTML='<i class="fas fa-circle" style="font-size:8px"></i> Session Active';
-      localStorage.setItem('activeAttSession',JSON.stringify({active:true,day:day,time:time,date:getDateStr(),label:(DAY_LABELS_BLOCK[day]||day)+' '+time}));
-      showToast('Existing session loaded for '+(DAY_LABELS_BLOCK[day]||day)+' at '+time,'info');
-      syncActiveSessionBadge(); renderTable(); return;
-    }
-    var availableDays=blockDays.filter(function(bd){ return !sessions.some(function(s){ return s.day===bd&&s.time===time&&s.class===currentClass; }); });
-    if(availableDays.length===0){ alert('All days in this block already have attendance taken for this time.'); return; }
     var students=loadStudents(),filtered=[].concat(students);
     if(currentClass!=='all') filtered=filtered.filter(function(s){ return s.subject===currentClass||s.class===currentClass; });
     if(currentTrainer!=='all') filtered=filtered.filter(function(s){ return s.trainer===currentTrainer; });
-    var sc=0; availableDays.forEach(function(td){ var rec={}; filtered.forEach(function(s){ rec[s.id]='P'; }); sessions.push({id:'att_'+Date.now()+'_'+sc,date:getDateForDay(td),day:td,time:time,class:currentClass,records:rec}); sc++; });
+    var sc=0; blockDays.forEach(function(td){ var rec={}; filtered.forEach(function(s){ rec[s.id]='P'; }); sessions.push({id:'att_'+Date.now()+'_'+sc,date:getDateForDay(td),day:td,time:time,class:currentClass,records:rec}); sc++; });
     saveSessions();
     attSessionActive=true;
     document.getElementById('startAttBtn').innerHTML='<i class="fas fa-stop"></i> Stop Attendance';
