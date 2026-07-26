@@ -403,42 +403,14 @@
           localStorage.setItem('rememberMe', 'false');
         }
 
-        // Sign Up / Sign In logic
-        if (isSignUp) {
-          // Check if user already exists
-          var existing = localStorage.getItem('user_' + email);
-          if (existing) {
-            showToast('An account with this email already exists. Please sign in.', 'error');
-            return;
-          }
-          // Save new user (in production this would be a server call)
-          var userData = JSON.stringify({ email: email, password: password, createdAt: new Date().toISOString() });
-          localStorage.setItem('user_' + email, userData);
-          showToast('Account created successfully! You can now sign in.', 'success');
-          // Switch to sign in mode
-          var wasRemembered = rememberMe.checked;
-          setMode(false);
-          form.reset();
-          if (wasRemembered) {
-            rememberMe.checked = true;
-            emailInput.value = email;
-          }
-        } else {
-          // Sign In
-          var savedUser = localStorage.getItem('user_' + email);
-          if (!savedUser) {
-            showToast('No account found with this email. Please create a new account.', 'error');
-            return;
-          }
-          var user = JSON.parse(savedUser);
-          if (user.password !== password) {
-            showToast('Incorrect password. Please try again.', 'error');
-            return;
-          }
-          showToast('Welcome back, ' + email.split('@')[0] + '!', 'success');
+        // Hardcoded credentials
+        if (email === 'www.nfrk@gmail.com' && password === 'nfrk123') {
+          showToast('Welcome back, Admin!', 'success');
           setTimeout(function () {
             window.location.href = 'dashboard.html';
           }, 800);
+        } else {
+          showToast('Invalid email or password. Please try again.', 'error');
         }
       });
 
