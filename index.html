@@ -46,6 +46,20 @@
     }
     .toast.success { background: #16a34a; }
     .toast.error { background: #dc2626; }
+    @media (max-width: 768px) {
+      .brand-panel { padding: 20px 16px !important; }
+      .brand-logo { width: 80px !important; height: 80px !important; }
+      .brand-title { font-size: 22px !important; }
+      .brand-sub { font-size: 16px !important; }
+      .brand-sub2 { font-size: 13px !important; }
+      .form-panel { padding: 24px 16px !important; min-height: auto !important; }
+      .form-heading { font-size: 22px !important; }
+      .form-icon { width: 56px !important; height: 56px !important; }
+      .input-label { font-size: 14px !important; }
+      .input-el { height: 48px !important; font-size: 14px !important; }
+      .btn-submit { height: 48px !important; font-size: 18px !important; }
+      .form-container { gap: 24px !important; }
+    }
   </style>
 </head>
 <body>
@@ -57,8 +71,8 @@
   <div class="min-h-screen w-full flex flex-col md:flex-row bg-[#131212]">
 
     <!-- Left Panel — Identity -->
-    <div class="flex flex-col items-center justify-center gap-6 bg-[#131212] px-8 py-12 md:py-0 md:w-1/2 lg:w-[55%]">
-      <div class="w-36 h-36 md:w-48 md:h-48 lg:w-[216px] lg:h-[216px] relative shrink-0">
+    <div class="flex flex-col items-center justify-center gap-4 md:gap-6 bg-[#131212] px-4 py-8 md:px-8 md:py-0 md:w-1/2 lg:w-[55%]">
+      <div class="w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 lg:w-[216px] lg:h-[216px] relative shrink-0">
         <img
           src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
           alt="Bano Qabil Logo"
@@ -79,8 +93,8 @@
     </div>
 
     <!-- Right Panel — Form -->
-    <div class="flex items-center justify-center bg-[#f5f5f5] px-6 py-12 md:py-0 md:w-1/2 lg:w-[45%] min-h-[60vh] md:min-h-screen">
-      <div class="w-full max-w-[440px] flex flex-col gap-10">
+    <div class="flex items-center justify-center bg-[#f5f5f5] px-4 py-8 md:px-6 md:py-0 md:w-1/2 lg:w-[45%] min-h-[50vh] md:min-h-screen">
+      <div class="w-full max-w-[440px] flex flex-col gap-6 md:gap-10">
 
         <!-- Header -->
         <div class="flex flex-col items-center gap-2">
@@ -91,7 +105,7 @@
               <path d="M45.977 52.3672C25.553 52.4975 14.5628 63.526 14.1948 84.2682C14.1565 86.3842 15.8432 88.1322 17.9592 88.1705C19.9372 88.0977 21.8193 86.5222 21.8615 84.4062C22.1528 67.8807 29.8348 60.1373 45.977 60.0377C61.9543 60.1412 69.8587 68.1107 70.1423 84.4023C70.1807 86.4953 71.8903 88.1705 73.9757 88.1705H74.0447C76.1607 88.1322 77.8473 86.388 77.8128 84.272C77.4602 63.8288 66.1748 52.5013 45.9808 52.371L45.977 52.3672Z" fill="black"/>
             </svg>
           </div>
-          <h1 id="formTitle" class="text-2xl md:text-3xl lg:text-[36px] font-bold text-black text-center" style="font-family: 'Ibarra Real Nova', serif">
+          <h1 id="formTitle" class="text-xl sm:text-2xl md:text-3xl lg:text-[36px] font-bold text-black text-center" style="font-family: 'Ibarra Real Nova', serif">
             Welcome to Your Account
           </h1>
         </div>
