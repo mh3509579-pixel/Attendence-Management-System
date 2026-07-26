@@ -12,6 +12,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
+    body { overflow-x: hidden; }
 
     .sidebar-link {
       font-family: 'Inter', sans-serif;
@@ -317,7 +318,7 @@
           <div class="flex-1">
             <p class="text-xl md:text-3xl lg:text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Timetable Management</p>
+              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: <span id="sessionLabel">03</span></p>
               <span id="activeSessionBadge" class="att-session-badge hidden"></span>
             </div>
           </div>
@@ -391,8 +392,8 @@
       </div>
 
       <!-- Timetable Grid -->
-      <div id="timetableWrapper" class="card-soft p-0 overflow-x-auto" style="-webkit-overflow-scrolling:touch">
-        <div id="timetableGrid" class="timetable-grid" style="min-width:600px">
+      <div id="timetableWrapper" class="card-soft p-0">
+        <div id="timetableGrid" class="timetable-grid">
           <div class="timetable-time-header">Time</div>
           <div class="timetable-header">Mon - Tue</div>
           <div class="timetable-header">Wed - Thu</div>
@@ -1557,6 +1558,7 @@ document.addEventListener('click', function(e) {
     renderTimetable();
     renderTrashList();
     (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+    (function(){var d=localStorage.getItem('studySessions');if(d){try{var s=JSON.parse(d);var a=s.filter(function(x){return x.status==='Active';});document.getElementById('sessionLabel').textContent=a.length>0?a[0].name:'No active session';}catch(e){}}})();
   </script>
 
 </body>

@@ -9,6 +9,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
+    body { overflow-x: hidden; }
     .sidebar-link {
       font-family: 'Inter', sans-serif;
       font-weight: 500;
@@ -227,7 +228,7 @@
           <div class="flex-1">
             <p class="text-xl md:text-3xl lg:text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: <span id="sessionLabel">03</span></p>
               <span id="activeSessionBadge" class="att-session-badge hidden"></span>
             </div>
           </div>
@@ -395,6 +396,7 @@
     });
 
     (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+    (function(){var d=localStorage.getItem('studySessions');if(d){try{var s=JSON.parse(d);var a=s.filter(function(x){return x.status==='Active';});document.getElementById('sessionLabel').textContent=a.length>0?a[0].name:'No active session';}catch(e){}}})();
 
     function ls(k){ try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; } }
 

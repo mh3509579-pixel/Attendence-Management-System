@@ -9,6 +9,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
+    body { overflow-x: hidden; }
     .sidebar-link {
       font-family: 'Inter', sans-serif;
       font-weight: 500;
@@ -230,7 +231,7 @@
           <div class="flex-1">
             <p class="text-xl md:text-3xl lg:text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: <span id="sessionLabel">03</span></p>
               <span id="activeSessionBadge" class="att-session-badge hidden"></span>
             </div>
           </div>
@@ -439,7 +440,56 @@
       }
     });
 
-createClassBtn.addEventListener('click', function () {
+    function loadSessions() {
+      var data = localStorage.getItem('studySessions');
+      var sessions = data ? JSON.parse(data) : [];
+
+      var existing = sessionCardsContainer.querySelectorAll('[data-session-id]');
+      existing.forEach(function (el) { el.remove(); });
+
+      if (sessionEmptyPlaceholder) sessionEmptyPlaceholder.remove();
+
+      if (sessions.length === 0) {
+        var ph = document.createElement('div');
+        ph.id = 'sessionEmptyPlaceholder';
+        ph.className = 'col-span-full flex flex-col items-center justify-center py-8';
+        ph.innerHTML =
+          '<hr class="w-full border-t border-black/10 mb-4" />' +
+          '<svg class="w-12 h-12 text-black/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />' +
+          '</svg>' +
+          '<p class="text-sm text-black/40 text-center" style="font-family: \'Inter\', sans-serif">No data available</p>';
+        sessionCardsContainer.appendChild(ph);
+        return;
+      }
+
+      sessions.forEach(function (s) {
+        var card = document.createElement('div');
+        card.className = 'bg-[#D8E6FE] rounded-[16px] p-3 shadow-sm border border-black/5';
+        card.setAttribute('data-session-id', s.id);
+        card.setAttribute('data-name', s.name.toLowerCase());
+
+        card.innerHTML =
+          '<div class="flex items-start justify-between mb-3">' +
+            '<p class="text-base font-bold text-black" style="font-family: \'Ibarra Real Nova\', serif">' + s.name + '</p>' +
+            '<span class="text-xs font-semibold px-3 py-1 rounded-full ' + (s.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '" style="font-family: \'Inter\', sans-serif">' + s.status + '</span>' +
+          '</div>' +
+          '<div class="flex flex-col gap-2">' +
+            '<div class="flex items-center gap-2">' +
+              '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>' +
+              '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">Duration: ' + s.duration + '</span>' +
+            '</div>' +
+            '<div class="flex items-center gap-2">' +
+              '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>' +
+              '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + s.startMonth + ' - ' + s.endMonth + '</span>' +
+            '</div>' +
+          '</div>';
+
+        sessionCardsContainer.appendChild(card);
+      });
+    }
+
+    createClassBtn.addEventListener('click', function () {
       var sessionName = document.getElementById('inputSessionName').value.trim();
       var duration = document.getElementById('inputDuration').value.trim();
       var startMonth = document.getElementById('inputStartMonth').value.trim();
@@ -451,31 +501,25 @@ createClassBtn.addEventListener('click', function () {
         return;
       }
 
-      if (sessionEmptyPlaceholder) {
-        sessionEmptyPlaceholder.remove();
+      var data = localStorage.getItem('studySessions');
+      var sessions = data ? JSON.parse(data) : [];
+
+      if (status === 'Active') {
+        sessions.forEach(function (s) { s.status = 'Inactive'; });
       }
 
-      var card = document.createElement('div');
-      card.className = 'bg-[#D8E6FE] rounded-[16px] p-3 shadow-sm border border-black/5';
-      card.setAttribute('data-name', sessionName.toLowerCase());
+      sessions.push({
+        id: 'sess_' + Date.now(),
+        name: sessionName,
+        duration: duration,
+        startMonth: startMonth,
+        endMonth: endMonth,
+        status: status
+      });
 
-      card.innerHTML =
-        '<div class="flex items-start justify-between mb-3">' +
-          '<p class="text-base font-bold text-black" style="font-family: \'Ibarra Real Nova\', serif">' + sessionName + '</p>' +
-          '<span class="text-xs font-semibold px-3 py-1 rounded-full ' + (status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '" style="font-family: \'Inter\', sans-serif">' + status + '</span>' +
-        '</div>' +
-        '<div class="flex flex-col gap-2">' +
-          '<div class="flex items-center gap-2">' +
-            '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>' +
-            '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">Duration: ' + duration + '</span>' +
-          '</div>' +
-          '<div class="flex items-center gap-2">' +
-            '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>' +
-            '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + startMonth + ' - ' + endMonth + '</span>' +
-          '</div>' +
-        '</div>';
+      localStorage.setItem('studySessions', JSON.stringify(sessions));
 
-      sessionCardsContainer.appendChild(card);
+      loadSessions();
 
       document.getElementById('inputSessionName').value = '';
       document.getElementById('inputDuration').value = '';
@@ -486,8 +530,24 @@ createClassBtn.addEventListener('click', function () {
       modalOverlay.classList.remove('show');
     });
 
+    loadSessions();
 
-    (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+    (function () {
+      var d = localStorage.getItem('activeAttSession');
+      var b = document.getElementById('activeSessionBadge');
+      if (d) { try { var s = JSON.parse(d); if (s.active) { b.textContent = s.label; b.classList.remove('hidden'); } } catch (e) {} }
+    })();
+
+    function updateSessionLabel() {
+      var data = localStorage.getItem('studySessions');
+      var sessions = data ? JSON.parse(data) : [];
+      var active = sessions.filter(function (s) { return s.status === 'Active'; });
+      var el = document.getElementById('sessionLabel');
+      if (el) {
+        el.textContent = active.length > 0 ? active[0].name : 'No active session';
+      }
+    }
+    updateSessionLabel();
   </script>
 </body>
 </html>

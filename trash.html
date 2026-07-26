@@ -9,6 +9,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
+    body { overflow-x: hidden; }
 
     .sidebar-link {
       font-family: 'Inter', sans-serif;
@@ -97,6 +98,37 @@
     @media (max-width: 768px) {
       aside { position: fixed; left: -260px; z-index: 50; transition: left 0.3s ease; }
       aside.mobile-open { left: 0; }
+      #trashTableWrap table,
+      #trashTableWrap thead,
+      #trashTableWrap tbody,
+      #trashTableWrap th,
+      #trashTableWrap td,
+      #trashTableWrap tr { display: block; }
+      #trashTableWrap thead { display: none; }
+      #trashTableWrap tr {
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 12px;
+        background: white;
+      }
+      #trashTableWrap td {
+        padding: 4px 0;
+        border: none;
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #trashTableWrap td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: rgba(0,0,0,0.5);
+        font-size: 11px;
+        font-family: 'Inter', sans-serif;
+      }
+      .dark-mode #trashTableWrap tr { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+      .dark-mode #trashTableWrap td::before { color: rgba(255,255,255,0.5); }
     }
 
     /* Grid View */
@@ -255,7 +287,7 @@
           <div class="flex-1">
             <p class="text-xl md:text-3xl lg:text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: <span id="sessionLabel">03</span></p>
               <span id="activeSessionBadge" class="att-session-badge hidden"></span>
             </div>
           </div>
@@ -308,8 +340,8 @@
       </div>
 
       <!-- Trash Table -->
-      <div id="trashTableWrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-      <div class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 overflow-hidden" style="min-width:700px">
+      <div id="trashTableWrap">
+      <div class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 overflow-hidden">
         <div id="emptyPlaceholder" class="flex flex-col items-center justify-center py-16">
           <svg class="w-20 h-20 text-black/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -494,15 +526,15 @@
         var row = document.createElement('tr');
         row.className = 'border-t border-black/5 hover:bg-black/5 transition-all';
         row.innerHTML =
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + (start + i + 1) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.name) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.id) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.day) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.time) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.subject) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.gender) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.contact) + '</td>' +
-          '<td class="px-4 py-3 text-center"><div class="flex items-center justify-center gap-1.5">' +
+          '<td data-label="#" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + (start + i + 1) + '</td>' +
+          '<td data-label="Name" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.name) + '</td>' +
+          '<td data-label="ID" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.id) + '</td>' +
+          '<td data-label="Day" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.day) + '</td>' +
+          '<td data-label="Time" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.time) + '</td>' +
+          '<td data-label="Subject" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.subject) + '</td>' +
+          '<td data-label="Gender" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.gender) + '</td>' +
+          '<td data-label="Contact" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.contact) + '</td>' +
+          '<td data-label="Action" class="px-4 py-3 text-center"><div class="flex items-center justify-center gap-1.5">' +
             '<button class="restore-btn restore-single btn-ripple" data-idx="' + (start + i) + '">' +
               '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>' +
               'Restore</button>' +
@@ -847,6 +879,7 @@
     if (document.body.classList.contains('view-grid')) { renderGridCards(); }
     else { renderTrashTable(); }
     (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+    (function(){var d=localStorage.getItem('studySessions');if(d){try{var s=JSON.parse(d);var a=s.filter(function(x){return x.status==='Active';});document.getElementById('sessionLabel').textContent=a.length>0?a[0].name:'No active session';}catch(e){}}})();
   </script>
 </body>
 </html>

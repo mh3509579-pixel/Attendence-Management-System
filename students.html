@@ -9,6 +9,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
+    body { overflow-x: hidden; }
     .sidebar-link {
       font-family: 'Inter', sans-serif;
       font-weight: 500;
@@ -204,6 +205,37 @@
       .sidebar-collapsed .sidebar.mobile-open .nav-label { display: block !important; }
       .sidebar-collapsed .sidebar.mobile-open .sidebar-link { justify-content: flex-start; padding: 12px 20px; }
       .sidebar-collapsed .sidebar.mobile-open .sidebar-link svg { width: 20px; height: 20px; }
+      #studentTableWrap table,
+      #studentTableWrap thead,
+      #studentTableWrap tbody,
+      #studentTableWrap th,
+      #studentTableWrap td,
+      #studentTableWrap tr { display: block; }
+      #studentTableWrap thead { display: none; }
+      #studentTableWrap tr {
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 12px;
+        background: white;
+      }
+      #studentTableWrap td {
+        padding: 4px 0;
+        border: none;
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #studentTableWrap td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: rgba(0,0,0,0.5);
+        font-size: 11px;
+        font-family: 'Inter', sans-serif;
+      }
+      .dark-mode #studentTableWrap tr { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+      .dark-mode #studentTableWrap td::before { color: rgba(255,255,255,0.5); }
     }
 
     /* Grid View */
@@ -346,7 +378,7 @@
           <div class="flex-1">
             <p class="text-xl md:text-3xl lg:text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <p class="text-xs md:text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: <span id="sessionLabel">03</span></p>
               <span id="activeSessionBadge" class="att-session-badge hidden"></span>
             </div>
           </div>
@@ -397,8 +429,8 @@
       </div>
 
       <!-- Student Table -->
-      <div id="studentTableWrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-        <div class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 overflow-hidden" style="min-width:700px">
+      <div id="studentTableWrap">
+        <div class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 overflow-hidden">
         <div id="emptyPlaceholder" class="flex flex-col items-center justify-center py-16">
           <svg class="w-16 h-16 text-black/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
@@ -590,15 +622,15 @@
         var row = document.createElement('tr');
         row.className = 'border-t border-black/5 hover:bg-black/5 transition-all';
         row.innerHTML =
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + (start + i + 1) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.name) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.id) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.time) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.day) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.subject) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.gender) + '</td>' +
-          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.contact) + '</td>' +
-          '<td class="px-4 py-3 text-center"><div class="flex items-center justify-center gap-1">' +
+          '<td data-label="#" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + (start + i + 1) + '</td>' +
+          '<td data-label="Name" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.name) + '</td>' +
+          '<td data-label="ID" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.id) + '</td>' +
+          '<td data-label="Time" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.time) + '</td>' +
+          '<td data-label="Day" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.day) + '</td>' +
+          '<td data-label="Subject" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.subject) + '</td>' +
+          '<td data-label="Gender" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.gender) + '</td>' +
+          '<td data-label="Contact" class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.contact) + '</td>' +
+          '<td data-label="Action" class="px-4 py-3 text-center"><div class="flex items-center justify-center gap-1">' +
             '<button class="edit-btn w-7 h-7 rounded-full hover:bg-black/10 flex items-center justify-center transition-all cursor-pointer" title="Edit / Update" type="button" data-idx="' + (start + i) + '">' +
               '<svg class="w-3.5 h-3.5 text-black/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
             '</button>' +
@@ -991,6 +1023,7 @@
       renderStudentsTable();
     }
     (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+    (function(){var d=localStorage.getItem('studySessions');if(d){try{var s=JSON.parse(d);var a=s.filter(function(x){return x.status==='Active';});document.getElementById('sessionLabel').textContent=a.length>0?a[0].name:'No active session';}catch(e){}}})();
   </script>
 </body>
 </html>
