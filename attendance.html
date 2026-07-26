@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; font-family:'Inter',sans-serif; }
+body { background:#f5f5f5; }
+.sidebar-link {
+  font-family:'Inter',sans-serif; font-weight:500; font-size:16px;
+  color:rgba(255,255,255,0.7); padding:12px 20px; border-radius:10px;
+  display:flex; align-items:center; gap:14px; transition:all .2s ease; text-decoration:none;
+}
+.sidebar-link:hover { background:rgba(255,255,255,0.1); color:#fff; }
+.sidebar-link.active { background:rgba(255,255,255,0.12); color:#fff; }
+.sidebar-link svg { width:20px; height:20px; flex-shrink:0; }
+.att-table { width:100%; border-collapse:collapse; font-size:13px; }
+.att-table thead { position:sticky; top:0; z-index:5; }
+.att-table th {
+  padding:10px 8px; text-align:left; font-weight:600; font-size:12px;
+  color:rgba(0,0,0,0.7); background:#eef2f7; border-bottom:2px solid #e2e8f0; white-space:nowrap;
+}
+.att-table td { padding:8px; border-bottom:1px solid rgba(0,0,0,0.05); vertical-align:middle; }
+.att-table tbody tr:hover { background:rgba(37,99,235,0.04); }
+.att-table tbody tr { transition:background .15s; }
+.att-cell {
+  width:40px; height:34px; border-radius:8px; border:none; font-weight:700; font-size:13px;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+  transition:all .15s ease; position:relative;
+}
+.att-cell:hover { transform:scale(1.15); }
+.att-cell.present { background:#dcfce7; color:#16a34a; }
+.att-cell.absent { background:#fee2e2; color:#dc2626; }
+.att-cell.late { background:#fef9c3; color:#ca8a04; }
+.att-cell.readonly { cursor:default; opacity:0.7; }
+.att-cell.readonly:hover { transform:none; }
+.attendance-btn {
+  padding:10px 24px; border-radius:12px; font-weight:600; font-size:14px;
+  border:none; cursor:pointer; transition:all .25s ease;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.attendance-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.15); }
+.attendance-btn:active { transform:scale(0.97); }
+.attendance-btn.primary { background:#131212; color:white; }
+.attendance-btn.success { background:#16a34a; color:white; }
+.attendance-btn.warning { background:#ca8a04; color:white; }
+.attendance-btn.danger { background:#dc2626; color:white; }
+.attendance-btn.outline { background:transparent; border:1.5px solid #e2e8f0; color:#374151; }
+.attendance-btn.outline:hover { background:#f8fafc; }
+.toast-container {
+  position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px;
+}
+.toast-item {
+  padding:14px 20px; border-radius:12px; font-family:'Inter',sans-serif; font-size:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.15); color:white;
+  display:flex; align-items:center; gap:10px; animation:toastIn .35s ease; min-width:280px;
+}
+.toast-item.success { background:#16a34a; }
+.toast-item.error { background:#dc2626; }
+.toast-item.warning { background:#ca8a04; }
+.toast-item.info { background:#2563eb; }
+.toast-item.removing { animation:toastOut .3s ease forwards; }
+@keyframes toastIn { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:translateX(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(60px); } }
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(4px); z-index:200; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  background:white; border-radius:20px; padding:32px;
+  width:90%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation:modalFadeIn .25s ease;
+}
+@keyframes modalFadeIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+.card-soft {
+  background:white; border-radius:16px; padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.04);
+}
+.status-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;
+}
+.status-badge.high { background:#dcfce7; color:#16a34a; }
+.status-badge.medium { background:#fef9c3; color:#ca8a04; }
+.status-badge.low { background:#fee2e2; color:#dc2626; }
+.table-wrap { overflow-x:auto; border-radius:12px; }
+.export-dropdown {
+  position:absolute; top:100%; right:0; margin-top:4px;
+  background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12);
+  border:1px solid rgba(0,0,0,0.06); overflow:hidden; z-index:20; min-width:160px; display:none;
+}
+.export-dropdown.show { display:block; }
+.export-dropdown button {
+  width:100%; padding:10px 16px; text-align:left; border:none;
+  background:transparent; font-size:13px; cursor:pointer;
+  display:flex; align-items:center; gap:8px; transition:background .15s;
+}
+.export-dropdown button:hover { background:#f3f4f6; }
+.session-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500;
+}
+.session-badge.active { background:#dcfce7; color:#16a34a; }
+.session-badge.inactive { background:#f3f4f6; color:#9ca3af; }
+.att-session-badge {
+  display:none!important; align-items:center; gap:5px; padding:2px 12px; border-radius:999px;
+  font-size:12px; font-weight:500; background:#dcfce7; color:#16a34a; font-family:'Inter',sans-serif;
+}
+.att-session-badge::before {
+  content:''; width:6px; height:6px; border-radius:50%; background:#16a34a; display:inline-block; flex-shrink:0;
+}
+.dark-mode body { background:#0d0d1a; }
+.dark-mode .main-content { background:#0d0d1a; }
+.dark-mode .card-soft { background:#1a1a30; border-color:rgba(255,255,255,0.08); }
+.dark-mode .card-soft .text-black,
+.dark-mode .card-soft .text-black\/50,
+.dark-mode .card-soft .text-black\/60,
+.dark-mode .card-soft .text-black\/70 { color:rgba(255,255,255,0.85) !important; }
+.dark-mode .bg-\[\#D8E6FE\] { background:#1a1a30; border-color:rgba(255,255,255,0.08); }
+.dark-mode .bg-\[\#D8E6FE\] .text-black,
+.dark-mode .bg-\[\#D8E6FE\] .text-black\/50,
+.dark-mode .bg-\[\#D8E6FE\] .text-black\/60,
+.dark-mode .bg-\[\#D8E6FE\] .text-black\/70 { color:rgba(255,255,255,0.85) !important; }
+.dark-mode .bg-\[\#D5D5D5\] { background:#1a1a30; }
+.dark-mode #welcomeBox,
+.dark-mode #welcomeBox * { color:white !important; }
+.dark-mode .att-session-badge { background:#064e3b; color:#6ee7b7; }
+.dark-mode .att-session-badge::before { background:#6ee7b7; }
+.dark-mode input,.dark-mode select { background:#0d0d1a; color:white; border-color:rgba(255,255,255,0.1); }
+.dark-mode input::placeholder { color:rgba(255,255,255,0.4); }
+.dark-mode .attendance-btn.outline { border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.7); }
+.dark-mode .attendance-btn.outline:hover { background:rgba(255,255,255,0.06); }
+.dark-mode .att-table th { background:#1e1e38; color:rgba(255,255,255,0.8); border-bottom-color:rgba(255,255,255,0.08); }
+.dark-mode .att-table td { border-bottom-color:rgba(255,255,255,0.05); }
+.dark-mode .att-table tbody tr:hover { background:rgba(255,255,255,0.03); }
+.dark-mode .status-badge.high { background:rgba(22,163,74,0.2); }
+.dark-mode .status-badge.medium { background:rgba(202,138,4,0.2); }
+.dark-mode .status-badge.low { background:rgba(220,38,38,0.2); }
+.dark-mode .export-dropdown { background:#1a1a30; border-color:rgba(255,255,255,0.08); }
+.dark-mode .export-dropdown button { color:rgba(255,255,255,0.85); }
+.dark-mode .export-dropdown button:hover { background:rgba(255,255,255,0.06); }
+.dark-mode .modal-box { background:#1a1a30; border:1px solid rgba(255,255,255,0.08); }
+.dark-mode #toggleModeBtn { background:rgba(255,255,255,0.15) !important; }
+html { scroll-behavior:smooth; }
+  </style>
+</head>
+<body>
+<div class="min-h-screen w-full flex">
+
+<aside class="w-[220px] min-h-screen bg-[#131212] flex flex-col shrink-0">
+  <div class="flex flex-col items-center gap-2 px-6 pt-8 pb-6 border-b border-white/10">
+    <div class="w-16 h-16 md:w-[72px] md:h-[72px] relative shrink-0">
+      <img src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png" alt="Bano Qabil" class="absolute inset-0 w-full h-full object-contain">
+    </div>
+    <div class="text-center">
+      <p class="text-sm font-bold text-white leading-tight" style="font-family:'Ibarra Real Nova',serif">BANO QABIL</p>
+      <p class="text-[11px] text-white/50 leading-tight" style="font-family:'Inter',sans-serif">Attendance Management System</p>
+    </div>
+  </div>
+  <nav class="flex flex-col gap-1 px-3 py-6 flex-1">
+    <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+    <a href="timetable.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Timetable</span></a>
+    <a href="classes.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Classes</span></a>
+    <a href="students.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Students</span></a>
+    <a href="attendance.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Attendance</span></a>
+    <a href="sessions.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Session</span></a>
+    <a href="trash.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Trash</span></a>
+  </nav>
+  <div class="px-3 pb-5 border-t border-white/10 pt-4 flex flex-col gap-3">
+    <button id="logoutBtn" class="sidebar-link w-full cursor-pointer bg-transparent border-none text-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+    <div class="flex flex-col items-center pt-1">
+      <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mb-1.5"><svg class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <p class="text-[12px] font-semibold text-white/60 tracking-wider uppercase" style="font-family:'Inter',sans-serif">Team E Project</p>
+      <p class="text-[9px] text-white/30 mt-0.5 tracking-wide" style="font-family:'Inter',sans-serif">Attendance Management System</p>
+    </div>
+  </div>
+</aside>
+
+<div id="mainContent" class="main-content flex-1 min-h-screen p-4">
+
+<div id="welcomeBox" class="bg-[#D5D5D5] rounded-[16px] p-5 flex items-center justify-between mb-3 relative">
+  <div class="flex items-center gap-5">
+    <div class="w-[84px] h-[84px] flex items-center justify-center shrink-0"><img src="src/Images/graduation-cap (1).png" alt="Graduation Cap" class="w-full h-full object-contain"></div>
+    <div>
+      <p class="text-[36px] font-bold text-[#131212] leading-tight" style="font-family:'Ibarra Real Nova',serif">Welcome Admin</p>
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="text-sm text-[#131212]/60" style="font-family:'Inter',sans-serif">Session: 03</p>
+        <span id="activeSessionBadge" class="att-session-badge hidden"></span>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col items-end gap-2">
+    <button id="toggleModeBtn" class="w-[40px] h-[40px] rounded-full bg-[#131212] flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" aria-label="Toggle dark mode">
+      <i id="modeIcon" class="fas fa-moon text-white text-lg"></i>
+    </button>
+    <div class="flex items-center gap-1.5">
+      <svg class="w-4 h-4 text-[#131212]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p id="currentDate" class="text-sm" style="font-family:'Inter',sans-serif;color:rgba(19,18,18,0.6)"></p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex flex-wrap items-center justify-between gap-3 mb-3">
+  <div class="flex items-center gap-3 flex-wrap">
+    <button id="startAttBtn" class="attendance-btn primary"><i class="fas fa-play"></i> Start Attendance</button>
+    <span id="sessionBadge" class="session-badge inactive"><i class="fas fa-circle" style="font-size:8px"></i> Session Inactive</span>
+  </div>
+  <div class="flex items-center gap-3 flex-wrap">
+    <label class="flex items-center gap-2 text-sm font-medium text-black/70" style="font-family:'Inter',sans-serif"><i class="fas fa-filter"></i> Day:</label>
+    <select id="dayFilter" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none" style="font-family:'Inter',sans-serif;min-width:140px"><option value="all">All Days</option></select>
+    <label class="flex items-center gap-2 text-sm font-medium text-black/70" style="font-family:'Inter',sans-serif"><i class="fas fa-clock"></i> Time:</label>
+    <select id="timeFilter" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none" style="font-family:'Inter',sans-serif;min-width:130px"><option value="all">All Times</option></select>
+    <label class="flex items-center gap-2 text-sm font-medium text-black/70" style="font-family:'Inter',sans-serif"><i class="fas fa-filter"></i> Class:</label>
+    <select id="classFilter" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none" style="font-family:'Inter',sans-serif;min-width:160px"><option value="all">All Classes</option></select>
+    <label class="flex items-center gap-2 text-sm font-medium text-black/70" style="font-family:'Inter',sans-serif"><i class="fas fa-user-tie"></i> Trainer:</label>
+    <select id="trainerFilter" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none" style="font-family:'Inter',sans-serif;min-width:160px"><option value="all">All Trainers</option></select>
+  </div>
+</div>
+
+<div class="card-soft flex flex-wrap items-center justify-between gap-3 mb-3">
+  <div class="flex items-center gap-3 flex-1 min-w-[200px]">
+    <i class="fas fa-search text-black/40"></i>
+    <input id="searchInput" type="text" placeholder="Search by Name, ID, Subject or Contact..." class="bg-transparent border-none outline-none text-sm text-black flex-1" style="font-family:'Inter',sans-serif">
+  </div>
+  <div class="flex items-center gap-2 flex-wrap">
+    <button id="markAllBtn" class="attendance-btn success text-sm px-4 py-2"><i class="fas fa-check-double"></i> Mark All Present</button>
+    <select id="statusFilter" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none" style="font-family:'Inter',sans-serif">
+      <option value="all">All Status</option>
+      <option value="present">Present</option>
+      <option value="absent">Absent</option>
+      <option value="late">Leave</option>
+    </select>
+    <div style="position:relative">
+      <button id="exportBtn" class="attendance-btn outline text-sm px-4 py-2"><i class="fas fa-download"></i> Export</button>
+      <div id="exportDropdown" class="export-dropdown">
+        <button type="button" data-format="csv"><i class="fas fa-file-csv text-green-600"></i> Export CSV</button>
+        <button type="button" data-format="excel"><i class="fas fa-file-excel text-green-700"></i> Export Excel</button>
+        <button type="button" data-format="pdf"><i class="fas fa-file-pdf text-red-600"></i> Export PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card-soft p-0 overflow-hidden">
+  <div class="table-wrap">
+    <table id="attTable" class="att-table">
+      <thead id="attThead">
+        <tr id="attHeaderRow">
+          <th style="width:50px">#</th>
+          <th style="min-width:140px">Name</th>
+          <th style="width:90px">ID</th>
+          <th style="width:80px">%</th>
+          <th style="width:100px">Status</th>
+        </tr>
+      </thead>
+      <tbody id="attTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+  <div class="card-soft text-center"><p class="text-xs text-black/50" style="font-family:'Inter',sans-serif">Total Students</p><p id="statTotal" class="text-xl font-bold text-black mt-1" style="font-family:'Inter',sans-serif">0</p></div>
+  <div class="card-soft text-center"><p class="text-xs text-black/50" style="font-family:'Inter',sans-serif">Present</p><p id="statPresent" class="text-xl font-bold text-green-600 mt-1" style="font-family:'Inter',sans-serif">0</p></div>
+  <div class="card-soft text-center"><p class="text-xs text-black/50" style="font-family:'Inter',sans-serif">Absent</p><p id="statAbsent" class="text-xl font-bold text-red-600 mt-1" style="font-family:'Inter',sans-serif">0</p></div>
+  <div class="card-soft text-center"><p class="text-xs text-black/50" style="font-family:'Inter',sans-serif">Leave</p><p id="statLate" class="text-xl font-bold text-yellow-600 mt-1" style="font-family:'Inter',sans-serif">0</p></div>
+</div>
+
+</div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-box text-center">
+    <div id="modalIconBox" class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4"><i id="modalIcon" class="fas fa-question-circle text-blue-600 text-2xl"></i></div>
+    <p id="modalMessage" class="text-base font-semibold text-black mb-2" style="font-family:'Inter',sans-serif">Are you sure?</p>
+    <p id="modalSub" class="text-sm text-black/50 mb-6" style="font-family:'Inter',sans-serif">This action will mark all students present.</p>
+    <div class="flex items-center justify-center gap-3">
+      <button id="modalCancelBtn" class="px-6 py-2.5 rounded-full border border-black/10 text-sm font-medium text-black/70 hover:bg-black/5 transition-all cursor-pointer" style="font-family:'Inter',sans-serif">Cancel</button>
+      <button id="modalConfirmBtn" class="px-6 py-2.5 rounded-full bg-[#131212] text-white text-sm font-semibold hover:opacity-85 transition-all cursor-pointer" style="font-family:'Inter',sans-serif">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var DAY_LABELS={monday:'Mon',tuesday:'Tue',wednesday:'Wed',thursday:'Thu',friday:'Fri',saturday:'Sat',sunday:'Sun'};
+var DAY_NAMES={0:'sunday',1:'monday',2:'tuesday',3:'wednesday',4:'thursday',5:'friday',6:'saturday'};
+var DAY_FULL={monday:'Monday',tuesday:'Tuesday',wednesday:'Wednesday',thursday:'Thursday',friday:'Friday',saturday:'Saturday',sunday:'Sunday'};
+var TIMETABLE_BLOCK_DAYS={'monday-tuesday':['monday','tuesday'],'wednesday-thursday':['wednesday','thursday'],'saturday-sunday':['saturday','sunday']};
+var DAY_LABELS_BLOCK={'monday-tuesday':'Monday - Tuesday','wednesday-thursday':'Wednesday - Thursday','saturday-sunday':'Saturday - Sunday'};
+var attSessionActive=false,sessions=[],currentStudents=[],filteredStudents=[];
+var currentClass='all',currentDay='all',currentTime='all',currentTrainer='all',searchQuery='',statusFilter='all';
+
+function loadStudents(){ try { var raw=localStorage.getItem('studentsData'); return raw?JSON.parse(raw):[]; } catch(e){ return []; } }
+function loadTimetable(){ try { return JSON.parse(localStorage.getItem('timetableData'))||[]; } catch(e){ return []; } }
+function loadSessions(){ try { var raw=localStorage.getItem('attendanceSessions'); sessions=raw?JSON.parse(raw):[]; } catch(e){ sessions=[]; } }
+function saveSessions(){ localStorage.setItem('attendanceSessions',JSON.stringify(sessions)); }
+function loadTrainers(){ try { var raw=localStorage.getItem('trainersData'); return raw?JSON.parse(raw):[]; } catch(e){ return []; } }
+function getDateStr(){ var d=new Date(); return d.toISOString().split('T')[0]; }
+function getDateForDay(dayName){ var dayMap={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6}; var target=dayMap[dayName]; if(target===undefined) return getDateStr(); var d=new Date(); var diff=target-d.getDay(); if(diff<0) diff+=7; d.setDate(d.getDate()+diff); return d.toISOString().split('T')[0]; }
+
+function getDisplaySessions(){
+  return sessions.filter(function(s){ return (currentDay==='all'||s.day===currentDay)&&(currentTime==='all'||s.time===currentTime); });
+}
+
+function renderTable(){
+  var students=loadStudents(); currentStudents=students; applyFilters(); renderHeader();
+  var disp=getDisplaySessions();
+  var tbody=document.getElementById('attTableBody');
+  var total=filteredStudents.length;
+  var colspan=3+disp.length+2;
+  if(total===0){
+    tbody.innerHTML='<tr><td colspan="'+colspan+'" class="text-center py-12 text-sm text-black/40" style="font-family:\'Inter\',sans-serif"><i class="fas fa-users-slash text-3xl block mb-2"></i>No students found</td></tr>';
+    updateStats([]); return;
+  }
+  var html='';
+  for(var i=0;i<filteredStudents.length;i++){
+    var s=filteredStudents[i],pct=calculatePercentage(s.id);
+    var statusCls=getStatusFromPct(pct),statusLabel=getStatusLabel(pct);
+    html+='<tr>';
+    html+='<td class="text-sm text-black/60" style="font-family:\'Inter\',sans-serif">'+(i+1)+'</td>';
+    html+='<td class="text-sm font-medium text-black" style="font-family:\'Inter\',sans-serif">'+esc(s.name)+'</td>';
+    html+='<td class="text-sm text-black/60" style="font-family:\'Inter\',sans-serif">'+esc(s.id)+'</td>';
+    for(var d=0;d<disp.length;d++){
+      var rec=disp[d].records[s.id]||'P';
+      var cls=rec==='P'?'present':rec==='A'?'absent':'late';
+      var oidx=sessions.indexOf(disp[d]);
+      html+='<td class="text-center"><button class="att-cell '+cls+'" data-sid="'+esc(s.id)+'" data-sidx="'+oidx+'">'+rec+'</button></td>';
+    }
+    html+='<td class="text-center"><span class="text-sm font-bold '+(pct>=80?'text-green-600':pct>=50?'text-yellow-600':'text-red-600')+'" style="font-family:\'Inter\',sans-serif">'+pct+'%</span></td>';
+    html+='<td class="text-center"><span class="status-badge '+statusCls+'">'+(statusCls==='high'?'<i class="fas fa-check-circle"></i>':statusCls==='medium'?'<i class="fas fa-exclamation-circle"></i>':'<i class="fas fa-times-circle"></i>')+' '+statusLabel+'</span></td>';
+    html+='</tr>';
+  }
+  tbody.innerHTML=html; updateStats(filteredStudents);
+}
+
+function renderHeader(){
+  var tr=document.getElementById('attHeaderRow');
+  tr.innerHTML='<th style="width:50px">#</th><th style="min-width:140px">Name</th><th style="width:90px">ID</th>';
+  var disp=getDisplaySessions();
+  for(var d=0;d<disp.length;d++){
+    var s=disp[d];
+    tr.innerHTML+='<th style="width:80px;font-size:11px;line-height:1.3">'+DAY_LABELS[s.day]+'<br><span style="font-weight:400;font-size:10px">'+s.time+'<br>'+s.date+'</span></th>';
+  }
+  tr.innerHTML+='<th style="width:80px">%</th><th style="width:100px">Status</th>';
+}
+
+function calculatePercentage(sid){
+  var disp=getDisplaySessions(),total=0,sum=0;
+  for(var d=0;d<disp.length;d++){ total++; var val=disp[d].records[sid]||'P'; if(val==='P') sum+=100; else if(val==='L') sum+=50; }
+  return total>0?Math.round(sum/total):0;
+}
+function getStatusFromPct(pct){ return pct>=80?'high':pct>=50?'medium':'low'; }
+function getStatusLabel(pct){ return pct>=80?'Good':pct>=50?'Average':'Poor'; }
+
+function updateStats(students){
+  var disp=getDisplaySessions(),total=students.length,pr=0,ab=0,la=0;
+  for(var i=0;i<students.length;i++){ for(var d=0;d<disp.length;d++){ var val=disp[d].records[students[i].id]||'P'; if(val==='P') pr++; else if(val==='A') ab++; else if(val==='L') la++; } }
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statPresent').textContent=pr;
+  document.getElementById('statAbsent').textContent=ab;
+  document.getElementById('statLate').textContent=la;
+}
+
+function esc(str){ var d=document.createElement('div'); d.appendChild(document.createTextNode(str)); return d.innerHTML; }
+
+function applyFilters(){
+  var students=loadStudents(); filteredStudents=[].concat(students);
+  if(currentClass&&currentClass!=='all') filteredStudents=filteredStudents.filter(function(s){ return s.subject===currentClass||s.class===currentClass; });
+  if(currentTrainer&&currentTrainer!=='all') filteredStudents=filteredStudents.filter(function(s){ return s.trainer===currentTrainer; });
+  if(searchQuery){ var q=searchQuery.toLowerCase(); filteredStudents=filteredStudents.filter(function(s){ return s.name.toLowerCase().indexOf(q)!==-1||s.id.toLowerCase().indexOf(q)!==-1||(s.subject||'').toLowerCase().indexOf(q)!==-1||(s.contact||'').toLowerCase().indexOf(q)!==-1; }); }
+  if(statusFilter&&statusFilter!=='all') filteredStudents=filteredStudents.filter(function(s){ var am=true; for(var d=0;d<sessions.length;d++){ var val=sessions[d].records[s.id]||'P'; if(statusFilter==='present'&&val!=='P'){ am=false;break; } if(statusFilter==='absent'&&val!=='A'){ am=false;break; } if(statusFilter==='late'&&val!=='L'){ am=false;break; } } return am; });
+}
+
+function handleAttClick(e){
+  var btn=e.target.closest('.att-cell'); if(!btn) return;
+  var sid=btn.getAttribute('data-sid'),sidx=parseInt(btn.getAttribute('data-sidx'));
+  if(isNaN(sidx)||sidx<0||sidx>=sessions.length) return;
+  var current=sessions[sidx].records[sid]||'P';
+  if(current==='P') sessions[sidx].records[sid]='A'; else if(current==='A') sessions[sidx].records[sid]='L'; else sessions[sidx].records[sid]='P';
+  saveSessions(); renderTable();
+}
+
+function toggleAttendanceSession(){
+  if(!attSessionActive){
+    var day=currentDay,time=currentTime;
+    if(day==='all'||time==='all'){ alert('Please select a specific Day and Time from the filters first.'); return; }
+    var blockDays=TIMETABLE_BLOCK_DAYS[day]; if(!blockDays){ alert('Invalid day block selected.'); return; }
+    var availableDays=blockDays.filter(function(bd){ return !sessions.some(function(s){ return s.day===bd&&s.time===time; }); });
+    if(availableDays.length===0){ alert('All days in this block already have attendance taken for this time.'); return; }
+    var students=loadStudents(),filtered=[].concat(students);
+    if(currentClass!=='all') filtered=filtered.filter(function(s){ return s.subject===currentClass||s.class===currentClass; });
+    if(currentTrainer!=='all') filtered=filtered.filter(function(s){ return s.trainer===currentTrainer; });
+    var sc=0; availableDays.forEach(function(td){ var rec={}; filtered.forEach(function(s){ rec[s.id]='P'; }); sessions.push({id:'att_'+Date.now()+'_'+sc,date:getDateForDay(td),day:td,time:time,records:rec}); sc++; });
+    saveSessions();
+    attSessionActive=true;
+    document.getElementById('startAttBtn').innerHTML='<i class="fas fa-stop"></i> Stop Attendance';
+    document.getElementById('startAttBtn').className='attendance-btn danger';
+    document.getElementById('sessionBadge').className='session-badge active';
+    document.getElementById('sessionBadge').innerHTML='<i class="fas fa-circle" style="font-size:8px"></i> Session Active';
+    localStorage.setItem('activeAttSession',JSON.stringify({active:true,day:day,time:time,date:getDateStr(),label:(DAY_LABELS_BLOCK[day]||day)+' '+time+' ('+sc+' days)'}));
+    showToast('Sessions started for '+sc+' day(s) in '+(DAY_LABELS_BLOCK[day]||day)+' block at '+time,'success');
+  } else {
+    attSessionActive=false;
+    document.getElementById('startAttBtn').innerHTML='<i class="fas fa-play"></i> Start Attendance';
+    document.getElementById('startAttBtn').className='attendance-btn primary';
+    document.getElementById('sessionBadge').className='session-badge inactive';
+    document.getElementById('sessionBadge').innerHTML='<i class="fas fa-circle" style="font-size:8px"></i> Session Inactive';
+    localStorage.removeItem('activeAttSession');
+    showToast('Attendance session ended.','info');
+  }
+  syncActiveSessionBadge(); renderTable();
+}
+
+function syncActiveSessionBadge(){
+  var b=document.getElementById('activeSessionBadge'),d=localStorage.getItem('activeAttSession');
+  if(d){ try { var s=JSON.parse(d); if(s.active){ b.textContent=s.label; b.classList.remove('hidden'); return; } } catch(e){} }
+  b.classList.add('hidden');
+}
+
+function markAllPresent(){
+  var disp=getDisplaySessions();
+  for(var i=0;i<filteredStudents.length;i++){ var sid=filteredStudents[i].id; for(var d=0;d<disp.length;d++){ disp[d].records[sid]='P'; } }
+  saveSessions(); renderTable(); showToast('All visible students marked Present!','success');
+}
+
+function showToast(msg,type){
+  if(!type) type='success';
+  var container=document.getElementById('toastContainer');
+  var icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+  var el=document.createElement('div'); el.className='toast-item '+type;
+  el.innerHTML='<i class="fas '+(icons[type]||'fa-check-circle')+'"></i><span>'+msg+'</span>';
+  container.appendChild(el);
+  setTimeout(function(){ el.classList.add('removing'); setTimeout(function(){ el.remove(); },300); },3000);
+}
+
+var modalCallback=null;
+function showModal(msg,sub,icon,callback){
+  document.getElementById('modalMessage').textContent=msg;
+  document.getElementById('modalSub').textContent=sub||'';
+  document.getElementById('modalIconBox').className='w-14 h-14 rounded-full '+(icon==='danger'?'bg-red-100':icon==='warning'?'bg-yellow-100':'bg-blue-100')+' flex items-center justify-center mx-auto mb-4';
+  var iconMap={danger:'fa-exclamation-triangle text-red-600',warning:'fa-exclamation-circle text-yellow-600'};
+  document.getElementById('modalIcon').className='fas '+(iconMap[icon]||'fa-question-circle text-blue-600')+' text-2xl';
+  modalCallback=callback; document.getElementById('modalOverlay').classList.add('show');
+}
+
+function populateClasses(){
+  var classes=[]; try { classes=JSON.parse(localStorage.getItem('classesData'))||[]; } catch(e){}
+  var select=document.getElementById('classFilter'); select.innerHTML='<option value="all">All Classes</option>';
+  for(var j=0;j<classes.length;j++){ var opt=document.createElement('option'); opt.value=classes[j].name; opt.textContent=classes[j].name; select.appendChild(opt); }
+}
+function populateTrainers(){
+  var trainers=[]; try { trainers=JSON.parse(localStorage.getItem('trainersData'))||[]; } catch(e){}
+  var students=loadStudents();
+  var names={};
+  for(var j=0;j<trainers.length;j++) if(trainers[j].name) names[trainers[j].name]=true;
+  for(var j=0;j<students.length;j++) if(students[j].trainer) names[students[j].trainer]=true;
+  var sorted=Object.keys(names).sort();
+  var select=document.getElementById('trainerFilter'); select.innerHTML='<option value="all">All Trainers</option>';
+  for(var j=0;j<sorted.length;j++){ var opt=document.createElement('option'); opt.value=sorted[j]; opt.textContent=sorted[j]; select.appendChild(opt); }
+}
+
+function populateDayAndTimeFilters(selClass){
+  var slots=loadTimetable();
+  if(selClass&&selClass!=='all') slots=slots.filter(function(s){ return s['class']===selClass; });
+  var daySelect=document.getElementById('dayFilter'),timeSelect=document.getElementById('timeFilter');
+  daySelect.innerHTML='<option value="all">All Days</option>'; timeSelect.innerHTML='<option value="all">All Times</option>';
+  var days={},times={};
+  slots.forEach(function(s){ if(s.day) days[s.day]=DAY_LABELS_BLOCK[s.day]||s.day; if(s.time) times[s.time]=true; });
+  Object.keys(days).sort().forEach(function(d){ var opt=document.createElement('option'); opt.value=d; opt.textContent=days[d]; daySelect.appendChild(opt); });
+  Object.keys(times).sort().forEach(function(t){ var opt=document.createElement('option'); opt.value=t; opt.textContent=t; timeSelect.appendChild(opt); });
+  if(selClass&&selClass!=='all'&&Object.keys(days).length>0){ daySelect.value=Object.keys(days).sort()[0]; currentDay=daySelect.value; if(Object.keys(times).length>0){ timeSelect.value=Object.keys(times).sort()[0]; currentTime=timeSelect.value; } }
+  else { currentDay='all'; currentTime='all'; }
+}
+
+// EVENT BINDINGS
+document.getElementById('attTableBody').addEventListener('click',handleAttClick);
+document.getElementById('startAttBtn').addEventListener('click',toggleAttendanceSession);
+document.getElementById('markAllBtn').addEventListener('click',function(){ showModal('Mark all visible students Present?','This will set Present for all sessions.','info',function(){ markAllPresent(); document.getElementById('modalOverlay').classList.remove('show'); }); });
+document.getElementById('dayFilter').addEventListener('change',function(){ currentDay=this.value; renderTable(); });
+document.getElementById('timeFilter').addEventListener('change',function(){ currentTime=this.value; renderTable(); });
+document.getElementById('classFilter').addEventListener('change',function(){ currentClass=this.value; populateDayAndTimeFilters(currentClass); renderTable(); });
+document.getElementById('trainerFilter').addEventListener('change',function(){ currentTrainer=this.value; renderTable(); });
+document.getElementById('searchInput').addEventListener('input',function(){ searchQuery=this.value.trim(); renderTable(); });
+document.getElementById('statusFilter').addEventListener('change',function(){ statusFilter=this.value; renderTable(); });
+
+var exportBtn=document.getElementById('exportBtn'),exportDropdown=document.getElementById('exportDropdown');
+exportBtn.addEventListener('click',function(e){ e.stopPropagation(); exportDropdown.classList.toggle('show'); });
+document.addEventListener('click',function(e){ if(!exportDropdown.contains(e.target)&&e.target!==exportBtn) exportDropdown.classList.remove('show'); });
+exportDropdown.addEventListener('click',function(e){
+  var btn=e.target.closest('button'); if(!btn) return;
+  var format=btn.getAttribute('data-format'); exportDropdown.classList.remove('show');
+  if(format==='csv') exportCSV(); else if(format==='excel') exportExcel(); else if(format==='pdf') exportPDF();
+});
+
+document.getElementById('modalCancelBtn').addEventListener('click',function(){ document.getElementById('modalOverlay').classList.remove('show'); modalCallback=null; });
+document.getElementById('modalOverlay').addEventListener('click',function(e){ if(e.target===this){ this.classList.remove('show'); modalCallback=null; } });
+document.getElementById('modalConfirmBtn').addEventListener('click',function(){ if(modalCallback) modalCallback(); });
+document.getElementById('logoutBtn').addEventListener('click',function(){ window.location.href='sign-page.html'; });
+
+// DARK MODE
+var toggleModeBtn=document.getElementById('toggleModeBtn'),modeIcon=document.getElementById('modeIcon');
+var isDark=localStorage.getItem('attendanceDarkMode')==='true';
+if(isDark){ modeIcon.className='fas fa-sun text-white text-lg'; document.body.classList.add('dark-mode'); }
+toggleModeBtn.addEventListener('click',function(){
+  isDark=!isDark; localStorage.setItem('attendanceDarkMode',isDark);
+  if(isDark){ modeIcon.className='fas fa-sun text-white text-lg'; document.body.classList.add('dark-mode'); }
+  else { modeIcon.className='fas fa-moon text-white text-lg'; document.body.classList.remove('dark-mode'); }
+});
+
+window.addEventListener('storage',function(e){
+  if(e.key==='classesData'||e.key==='timetableData'||e.key==='studentsData'||e.key==='trainersData'){ populateClasses(); populateTrainers(); populateDayAndTimeFilters(currentClass); renderTable(); }
+});
+
+// EXPORT
+function generateExportRows(){
+  var disp=getDisplaySessions(),rows=[];
+  for(var i=0;i<filteredStudents.length;i++){
+    var s=filteredStudents[i],pct=calculatePercentage(s.id),dayVals=[];
+    for(var d=0;d<disp.length;d++) dayVals.push(disp[d].records[s.id]||'P');
+    rows.push({name:s.name,id:s.id,days:dayVals,pct:pct,status:getStatusLabel(pct)});
+  }
+  return rows;
+}
+
+function downloadFile(content,filename,mimeType){
+  var blob=new Blob([content],{type:mimeType+';charset=utf-8;'});
+  var link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=filename;
+  link.style.display='none'; document.body.appendChild(link); link.click();
+  setTimeout(function(){ document.body.removeChild(link); URL.revokeObjectURL(link.href); },150);
+}
+
+function exportCSV(){
+  var disp=getDisplaySessions(),rows=generateExportRows();
+  if(rows.length===0){ showToast('No data to export','info'); return; }
+  var headers='Sr,Name,ID';
+  for(var d=0;d<disp.length;d++) headers+=','+DAY_LABELS[disp[d].day]+'-'+disp[d].time;
+  headers+=',Percentage,Status\n'; var csv=headers;
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; csv+=(i+1)+',"'+r.name+'","'+r.id+'"'; for(var d=0;d<r.days.length;d++) csv+=','+r.days[d]; csv+=','+r.pct+'%,'+r.status+'\n'; }
+  downloadFile(csv,'attendance_export.csv','text/csv'); showToast('CSV exported successfully!','success');
+}
+
+function exportExcel(){
+  var disp=getDisplaySessions(),rows=generateExportRows();
+  if(rows.length===0){ showToast('No data to export','info'); return; }
+  var xml='<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+  xml+='<Worksheet ss:Name="Attendance"><Table>';
+  xml+='<Row><Cell><Data ss:Type="String">Sr</Data></Cell><Cell><Data ss:Type="String">Name</Data></Cell><Cell><Data ss:Type="String">ID</Data></Cell>';
+  for(var d=0;d<disp.length;d++) xml+='<Cell><Data ss:Type="String">'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</Data></Cell>';
+  xml+='<Cell><Data ss:Type="String">Percentage</Data></Cell><Cell><Data ss:Type="String">Status</Data></Cell></Row>';
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; xml+='<Row><Cell><Data ss:Type="Number">'+(i+1)+'</Data></Cell><Cell><Data ss:Type="String">'+r.name+'</Data></Cell><Cell><Data ss:Type="String">'+r.id+'</Data></Cell>'; for(var d=0;d<r.days.length;d++) xml+='<Cell><Data ss:Type="String">'+r.days[d]+'</Data></Cell>'; xml+='<Cell><Data ss:Type="String">'+r.pct+'%</Data></Cell><Cell><Data ss:Type="String">'+r.status+'</Data></Cell></Row>'; }
+  xml+='</Table></Worksheet></Workbook>';
+  downloadFile(xml,'attendance_export.xls','application/vnd.ms-excel'); showToast('Excel exported successfully!','success');
+}
+
+function exportPDF(){
+  var disp=getDisplaySessions(),rows=generateExportRows();
+  if(rows.length===0){ showToast('No data to export','info'); return; }
+  var h='<html><head><style>body{font-family:Arial,sans-serif;padding:20px}h2{text-align:center;margin-bottom:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;font-size:12px}th{background:#2563eb;color:white}</style></head><body>';
+  h+='<h2>Attendance Report</h2>';
+  h+='<table><thead><tr><th>Sr</th><th>Name</th><th>ID</th>';
+  for(var d=0;d<disp.length;d++) h+='<th>'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</th>';
+  h+='<th>%</th><th>Status</th></tr></thead><tbody>';
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; h+='<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+r.id+'</td>'; for(var d=0;d<r.days.length;d++) h+='<td>'+r.days[d]+'</td>'; h+='<td>'+r.pct+'%</td><td>'+r.status+'</td></tr>'; }
+  h+='<'+'/tbody><'+'/table><'+'/body><'+'/html>';
+  var win=window.open('','_blank'); win.document.write(h); win.document.close(); win.focus(); win.print();
+  showToast('PDF export opened for printing.','info');
+}
+
+// INIT
+document.getElementById('currentDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+loadSessions(); populateClasses(); populateTrainers(); populateDayAndTimeFilters('all'); renderTable(); syncActiveSessionBadge();
+</script>
+</body>
+</html>

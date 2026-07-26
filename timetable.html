@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timetable | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    .sidebar-link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .sidebar-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .sidebar-link.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .sidebar-link svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .btn-primary { background: #2563EB; color: white; padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-sidebar { background:#131212;color:white;border-radius:10px;font-weight:600;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;font-family:'Inter',sans-serif;padding:8px 18px;font-size:13px }
+    .btn-sidebar:hover { opacity:0.8;transform:translateY(-1px) }
+    .btn-secondary { background: rgba(0,0,0,0.05); color: #131212; padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-secondary:hover { background: rgba(0,0,0,0.1); transform: translateY(-1px); }
+    .btn-success { background: #d1fae5; color: #065f46; padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-success:hover { background: #a7f3d0; transform: translateY(-1px); }
+
+    .card-soft {
+      background: white; border-radius: 16px; padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .timetable-header {
+      background: #D5D5D5; color: #131212; padding: 14px 12px;
+      font-weight: 600; font-size: 13px; text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+    .timetable-time-header {
+      background: #D5D5D5; color: #131212; padding: 14px 12px;
+      font-weight: 600; font-size: 13px; text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .trash-section { display: none; }
+    .trash-section.show { display: block; animation: fadeSlide 0.3s ease; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: white; border-radius: 20px; padding: 28px;
+      width: 90%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.25s ease;
+    }
+    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardFadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+    .slot-card {
+      background: white; border-radius: 10px; padding: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);
+      cursor: pointer; transition: all 0.2s ease; position: relative; animation: cardFadeIn 0.3s ease;
+    }
+    .slot-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .slot-subject { font-weight: 600; font-size: 12px; color: #131212; margin-bottom: 2px; }
+    .slot-code { font-size: 10px; color: rgba(0,0,0,0.4); margin-bottom: 4px; }
+    .slot-detail { font-size: 10px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .slot-detail i { width: 12px; font-size: 9px; }
+    .slot-status {
+      position: absolute; top: 4px; right: 4px;
+      font-size: 8px; padding: 1px 6px; border-radius: 6px; font-weight: 500;
+    }
+    .slot-status.active { background: #d1fae5; color: #065f46; }
+    .slot-status.cancelled { background: #fee2e2; color: #dc2626; }
+    .slot-status.rescheduled { background: #fef3c7; color: #d97706; }
+
+    .badge {
+      display: inline-flex; align-items: center; padding: 2px 8px;
+      border-radius: 10px; font-size: 11px; font-weight: 500;
+    }
+
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: 100px repeat(3, 1fr);
+      gap: 2px;
+    }
+    .timetable-grid > div {
+      min-height: 80px;
+    }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: rgba(0,0,0,0.35);
+    }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #131212; color: white;
+      padding: 14px 24px; border-radius: 12px; font-family: 'Inter', sans-serif;
+      font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 200;
+      transform: translateY(80px); opacity: 0; transition: all 0.35s ease;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .pill-btn { font-family: 'Inter', sans-serif; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+
+
+
+    /* Dark Mode */
+    .dark-mode .main-content { background-color: #0d0d1a; }
+    .dark-mode #welcomeBox { background-color: #1a1a30; }
+    .dark-mode #welcomeBox,
+    .dark-mode #welcomeBox * { color: white !important; }
+    .att-session-badge { display: none!important; align-items: center; gap: 5px; padding: 2px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; background: #dcfce7; color: #16a34a; font-family: 'Inter', sans-serif; }
+    .att-session-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #16a34a; display: inline-block; flex-shrink: 0; }
+    .dark-mode .att-session-badge { background: #064e3b; color: #6ee7b7; }
+    .dark-mode .att-session-badge::before { background: #6ee7b7; }
+    .dark-mode .card-soft { background-color: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .card-soft .text-black,
+    .dark-mode .card-soft .text-black\/50,
+    .dark-mode .card-soft .text-black\/60,
+    .dark-mode .card-soft .text-black\/40,
+    .dark-mode .card-soft .text-black\/70 { color: rgba(255,255,255,0.85) !important; }
+    .dark-mode .bg-\[\#D8E6FE\] { background-color: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .bg-\[\#D8E6FE\] .text-black,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/50,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/60,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/70,
+    .dark-mode .bg-\[\#D8E6FE\] .text-lg { color: rgba(255,255,255,0.85) !important; }
+    .dark-mode input::placeholder,
+    .dark-mode select::placeholder { color: rgba(255,255,255,0.4); }
+    .dark-mode .timetable-header { background: #1a1a30; color: rgba(255,255,255,0.85); }
+    .dark-mode .timetable-time-header { background: #1a1a30; color: rgba(255,255,255,0.85); }
+    .dark-mode .slot-card { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .slot-subject { color: rgba(255,255,255,0.9); }
+    .dark-mode .slot-code { color: rgba(255,255,255,0.4); }
+    .dark-mode .slot-detail { color: rgba(255,255,255,0.55); }
+    .dark-mode .btn-secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+    .dark-mode .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .dark-mode .modal-box { background: #1a1a30; border: 1px solid rgba(255,255,255,0.08); }
+    .dark-mode .modal-box label,
+    .dark-mode .modal-box .text-black,
+    .dark-mode .modal-box .text-black\/70,
+    .dark-mode .modal-box .text-black\/50,
+    .dark-mode .modal-box .text-black\/60 { color: rgba(255,255,255,0.85) !important; }
+    .dark-mode .modal-header { background: #1a1a30 !important; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .dark-mode .modal-header p { color: rgba(255,255,255,0.85) !important; }
+    .dark-mode .modal-header i { color: rgba(255,255,255,0.6) !important; }
+    .dark-mode input,
+    .dark-mode select { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; border-color: rgba(255,255,255,0.12) !important; }
+    .dark-mode .bg-red-50 { background-color: rgba(255,50,50,0.15) !important; }
+    .dark-mode .text-red-700 { color: #f87171 !important; }
+    .dark-mode .bg-green-100 { background-color: rgba(0,200,80,0.2) !important; }
+    .dark-mode .text-green-700 { color: #4ade80 !important; }
+    .dark-mode .border-red-100 { border-color: rgba(255,50,50,0.2) !important; }
+
+    .export-dropdown {
+      display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+      background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      min-width: 150px; z-index: 50; border: 1px solid rgba(0,0,0,0.05);
+    }
+    .export-dropdown.show { display: block; }
+    .export-dropdown button {
+      display: block; width: 100%; text-align: left; padding: 10px 16px;
+      border: none; background: none; font-size: 13px; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+    }
+    .export-dropdown button:hover { background: rgba(0,0,0,0.04); }
+    .dark-mode .export-dropdown { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .export-dropdown button { color: rgba(255,255,255,0.85); }
+    .dark-mode .export-dropdown button:hover { background: rgba(255,255,255,0.06); }
+
+    .sc-dropdown {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto;
+      margin-top: 4px;
+    }
+    .sc-dropdown.show { display: block; }
+    .sc-option {
+      padding: 8px 14px; font-size: 13px; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.15s; border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+    .sc-option:last-child { border-bottom: none; }
+    .sc-option:hover { background: #f3f4f6; }
+    .sc-option .sc-type {
+      font-size: 10px; padding: 1px 8px; border-radius: 6px; font-weight: 500; text-transform: capitalize;
+    }
+    .sc-option .sc-type.subject { background: #dbeafe; color: #2563eb; }
+    .sc-option .sc-type.class { background: #d1fae5; color: #065f46; }
+    .sc-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+    .sc-tag.subject { background: #dbeafe; color: #2563eb; }
+    .sc-tag.class { background: #d1fae5; color: #065f46; }
+    .sc-tag .sc-tag-remove {
+      cursor: pointer; font-size: 14px; opacity: 0.6; margin-left: 2px; line-height: 1;
+    }
+    .sc-tag .sc-tag-remove:hover { opacity: 1; }
+    .dark-mode .sc-dropdown { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .sc-option { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.05); }
+    .dark-mode .sc-option:hover { background: rgba(255,255,255,0.06); }
+    .dark-mode .sc-tag.subject { background: #1e3a5f; color: #93c5fd; }
+    .dark-mode .sc-tag.class { background: #064e3b; color: #6ee7b7; }
+    .dark-mode .sc-option .sc-type.subject { background: #1e3a5f; color: #93c5fd; }
+    .dark-mode .sc-option .sc-type.class { background: #064e3b; color: #6ee7b7; }
+   .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen w-full flex">
+
+  <!-- Sidebar -->
+  <aside class="w-[220px] min-h-screen bg-[#131212] flex flex-col shrink-0">
+    <div class="flex flex-col items-center gap-2 px-6 pt-8 pb-6 border-b border-white/10">
+      <div class="w-16 h-16 md:w-[72px] md:h-[72px] relative shrink-0">
+        <img
+          src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
+          alt="Bano Qabil"
+          class="absolute inset-0 w-full h-full object-contain"
+          onerror="var p=this.parentElement;this.remove();var d=document.createElement('div');d.className='w-full h-full flex items-center justify-center bg-[#1a1a2e] rounded-full';d.textContent='BQ';d.style.cssText='font-size:28px;color:white;font-weight:700;font-family:&quot;Ibarra Real Nova&quot;,serif;display:flex;align-items:center;justify-content:center;width:100%;height:100%';p.appendChild(d)" />
+      </div>
+      <div class="text-center">
+        <p class="text-sm font-bold text-white leading-tight" style="font-family: 'Ibarra Real Nova', serif">BANO QABIL</p>
+        <p class="text-[11px] text-white/50 leading-tight" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+      </div>
+    </div>
+    <nav class="flex flex-col gap-1 px-3 py-6 flex-1">
+      <a href="dashboard.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="timetable.html" class="sidebar-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Timetable</span>
+      </a>
+      <a href="classes.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <span>Classes</span>
+      </a>
+      <a href="students.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Students</span>
+      </a>
+      <a href="attendance.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Attendance</span>
+      </a>
+      <a href="sessions.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Session</span>
+      </a>
+      <a href="trash.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Trash</span>
+      </a>
+    </nav>
+    <div class="px-3 pb-5 border-t border-white/10 pt-4 flex flex-col gap-3">
+      <button id="logoutBtn" class="sidebar-link w-full cursor-pointer bg-transparent border-none text-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+      <div class="flex flex-col items-center pt-1">
+        <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+          <svg class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <p class="text-[12px] font-semibold text-white/60 tracking-wider uppercase" style="font-family: 'Inter', sans-serif">Team E Project</p>
+        <p class="text-[9px] text-white/30 mt-0.5 tracking-wide" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 bg-[#f5f5f0] min-h-screen p-4 main-content">
+
+      <!-- Welcome Box -->
+      <div id="welcomeBox" class="bg-[#D5D5D5] rounded-[16px] p-5 flex items-center justify-between mb-3 relative">
+        <div class="flex items-center gap-5">
+          <div class="w-[84px] h-[84px] flex items-center justify-center shrink-0">
+            <img src="src/Images/graduation-cap (1).png" alt="Graduation Cap" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <p class="text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Timetable Management</p>
+              <span id="activeSessionBadge" class="att-session-badge hidden"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <button id="toggleModeBtn" class="w-[40px] h-[40px] rounded-full bg-[#131212] flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" aria-label="Toggle dark mode">
+            <svg id="modeIcon" class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#131212]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <p id="currentDate" class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-3 flex-wrap">
+          <button id="addSlotBtn" class="btn-sidebar text-xs"><i class="fas fa-plus"></i> Add Slot</button>
+          <button id="bulkTrashBtn" class="btn-secondary text-xs px-3 py-2"><i class="fas fa-trash-alt"></i> Move to Trash</button>
+          <button id="showTrashBtn" class="btn-secondary text-xs px-3 py-2"><i class="fas fa-eye"></i> View Trash <span id="trashCount" class="badge bg-red-100 text-red-600 ml-1">0</span></button>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="copyPrevBtn" class="btn-secondary text-xs px-3 py-2"><i class="fas fa-copy"></i> Copy Previous</button>
+          <button id="exportBtn" class="btn-secondary text-xs px-3 py-2"><i class="fas fa-download"></i> Export</button>
+        </div>
+      </div>
+
+      <!-- Export Dropdown -->
+      <div id="exportDropdown" class="export-dropdown">
+        <button class="export-option" data-format="png"><i class="fas fa-image text-blue-600"></i> PNG</button>
+        <button class="export-option" data-format="jpeg"><i class="fas fa-image text-green-600"></i> JPEG</button>
+        <button class="export-option" data-format="pdf"><i class="fas fa-file-pdf text-red-600"></i> PDF</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="card-soft flex flex-wrap items-center gap-3 mb-3">
+        <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+          <i class="fas fa-search text-black/40"></i>
+          <input id="searchInput" type="text" placeholder="Search by Subject, Trainer, Class, Room..." class="bg-transparent border-none outline-none text-sm text-black flex-1" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="filterSubject" class="name px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none text-black" style="font-family: 'Inter', sans-serif">
+            <option value="all">All Classes</option>
+          </select>
+          <select id="filterTrainer" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none text-black" style="font-family: 'Inter', sans-serif">
+            <option value="all">All Trainers</option>
+          </select>
+          <select id="filterDay" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none text-black" style="font-family: 'Inter', sans-serif">
+            <option value="all">All Days</option>
+            <option value="monday-tuesday">Monday - Tuesday</option>
+            <option value="wednesday-thursday">Wednesday - Thursday</option>
+            <option value="saturday-sunday">Saturday - Sunday</option>
+          </select>
+          <select id="filterTime" class="px-3 py-2 rounded-xl border border-black/10 bg-white text-sm outline-none text-black" style="font-family: 'Inter', sans-serif">
+            <option value="all">All Times</option>
+            <option value="8:00-10:00">8:00 - 10:00</option>
+            <option value="10:00-12:00">10:00 - 12:00</option>
+            <option value="12:00-2:00">12:00 - 2:00</option>
+            <option value="2:00-4:00">2:00 - 4:00</option>
+            <option value="4:00-6:00">4:00 - 6:00</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Timetable Grid -->
+      <div id="timetableWrapper" class="card-soft p-0 overflow-x-auto">
+        <div id="timetableGrid" class="timetable-grid">
+          <div class="timetable-time-header">Time</div>
+          <div class="timetable-header">Monday - Tuesday</div>
+          <div class="timetable-header">Wednesday - Thursday</div>
+          <div class="timetable-header">Saturday - Sunday</div>
+        </div>
+      </div>
+      <div id="emptyState" class="empty-state" style="display:none">
+        <i class="fas fa-calendar-times text-5xl mb-4"></i>
+        <p class="text-lg font-medium">No Timetable Slots</p>
+        <p class="text-sm mt-1">Click "Add Slot" to create your first timetable entry.</p>
+      </div>
+
+      <!-- Trash Section -->
+      <div id="trashSection" class="trash-section mt-4">
+        <div class="card-soft">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-[#131212]" style="font-family: 'Poppins', sans-serif"><i class="fas fa-trash-alt text-red-500 mr-2"></i>Timetable Trash</h3>
+            <div class="flex gap-2">
+              <button id="restoreAllBtn" class="btn-success text-xs px-3 py-2"><i class="fas fa-undo"></i> Restore All</button>
+              <button id="closeTrashBtn" class="btn-secondary text-xs px-3 py-2"><i class="fas fa-times"></i> Close</button>
+            </div>
+          </div>
+          <div id="trashList" class="flex flex-col gap-2"></div>
+          <div id="trashEmpty" class="text-center py-8 text-black/40 text-sm">Trash is empty.</div>
+        </div>
+      </div>
+
+  </main>
+  </div>
+
+  <!-- Add Slot Modal -->
+  <div id="slotModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="modalTitle" class="text-lg font-bold text-[#131212]" style="font-family: 'Poppins', sans-serif"><i class="fas fa-calendar-plus mr-2"></i>Add Timetable Slot</h3>
+        <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+          <i class="fas fa-times text-black/60"></i>
+        </button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Subject / Class</label>
+            <select id="inputSubjectClass" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif">
+              <option value="">Select Subject / Class</option>
+            </select>
+            <input type="hidden" id="inputSubject" />
+            <input type="hidden" id="inputClass" />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Subject Code</label>
+            <input id="inputSubjectCode" type="text" placeholder="e.g. CS101" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Trainer</label>
+            <select id="inputTrainer" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif"><option value="">Select Trainer</option></select>
+          </div>
+          <div></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Day</label>
+            <select id="inputDay" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif">
+              <option value="">Select Day</option>
+              <option value="monday-tuesday">Monday - Tuesday</option>
+              <option value="wednesday-thursday">Wednesday - Thursday</option>
+              <option value="saturday-sunday">Saturday - Sunday</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Time</label>
+            <select id="inputTime" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif">
+              <option value="">Select Time</option>
+              <option value="8:00-10:00">8:00 - 10:00</option>
+              <option value="10:00-12:00">10:00 - 12:00</option>
+              <option value="12:00-2:00">12:00 - 2:00</option>
+              <option value="2:00-4:00">2:00 - 4:00</option>
+              <option value="4:00-6:00">4:00 - 6:00</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Room / Lab</label>
+          <input id="inputRoom" type="text" placeholder="e.g. Room 204 / Lab A" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Status</label>
+          <select id="inputStatus" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-[#2563EB] transition-all" style="font-family: 'Inter', sans-serif">
+            <option value="Active">Active</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Rescheduled">Rescheduled</option>
+          </select>
+        </div>
+        <div id="conflictWarning" class="hidden bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-start gap-2">
+          <i class="fas fa-exclamation-triangle mt-0.5"></i>
+          <span id="conflictMsg"></span>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button id="saveSlotBtn" class="btn-sidebar flex-1 py-3"><i class="fas fa-save"></i> Save Slot</button>
+        <button id="cancelModalBtn" class="btn-secondary flex-1 py-3"><i class="fas fa-times"></i> Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:400px">
+      <div class="text-center">
+        <div id="confirmIcon" class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+        </div>
+        <p id="confirmTitle" class="text-lg font-bold mb-2" style="font-family: 'Poppins', sans-serif">Are you sure?</p>
+        <p id="confirmMsg" class="text-sm text-black/60 mb-6" style="font-family: 'Inter', sans-serif"></p>
+        <div class="flex gap-3">
+          <button id="confirmYesBtn" class="btn-sidebar flex-1 py-2.5">Yes</button>
+          <button id="confirmNoBtn" class="btn-secondary flex-1 py-2.5">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Trash Modal -->
+  <div id="bulkTrashModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:550px">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-[#131212]" style="font-family: 'Poppins', sans-serif"><i class="fas fa-trash-alt text-red-500 mr-2"></i>Select Slots to Trash</h3>
+        <button id="closeBulkTrashBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+          <i class="fas fa-times text-black/60"></i>
+        </button>
+      </div>
+      <p class="text-sm text-black/50 mb-3" style="font-family: 'Inter', sans-serif">Select the slots you want to move to trash.</p>
+      <div id="bulkTrashList" class="max-h-[300px] overflow-y-auto flex flex-col gap-2 mb-4"></div>
+      <div id="bulkTrashEmpty" class="text-center py-6 text-black/40 text-sm hidden">No slots available.</div>
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <input id="selectAllSlots" type="checkbox" class="w-4 h-4 rounded border-black/20 cursor-pointer" />
+          <label for="selectAllSlots" class="text-sm text-black/60 cursor-pointer" style="font-family: 'Inter', sans-serif">Select All</label>
+        </div>
+        <div class="flex gap-2">
+          <button id="moveToTrashBtn" class="btn-secondary text-xs px-4 py-2"><i class="fas fa-trash-alt"></i> Move to Trash (<span id="selectedTrashCount">0</span>)</button>
+          <button id="cancelBulkTrashBtn" class="btn-secondary text-xs px-4 py-2"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Trash Modal -->
+  <div id="viewTrashModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:550px">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-[#131212]" style="font-family: 'Poppins', sans-serif"><i class="fas fa-trash-alt text-red-500 mr-2"></i>Trashed Slots</h3>
+        <button id="closeViewTrashBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+          <i class="fas fa-times text-black/60"></i>
+        </button>
+      </div>
+      <div id="viewTrashList" class="max-h-[350px] overflow-y-auto flex flex-col gap-2 mb-4"></div>
+      <div id="viewTrashEmpty" class="text-center py-8 text-black/40 text-sm hidden">Trash is empty.</div>
+      <div class="flex justify-between items-center">
+        <span id="viewTrashCount" class="text-sm text-black/50" style="font-family: 'Inter', sans-serif">0 item(s)</span>
+        <div class="flex gap-2">
+          <button id="viewRestoreAllBtn" class="btn-secondary text-xs px-4 py-2"><i class="fas fa-undo"></i> Restore All</button>
+          <button id="cancelViewTrashBtn" class="btn-secondary text-xs px-4 py-2"><i class="fas fa-times"></i> Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <i id="toastIcon" class="fas fa-check-circle"></i>
+    <span id="toastMessage">Success</span>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG
+    // ============================================================
+    var TIMETABLE_KEY = 'timetableData';
+    var TRASH_KEY = 'timetableTrashData';
+    var DAYS = ['monday-tuesday', 'wednesday-thursday', 'saturday-sunday'];
+    var TIMES = ['8:00-10:00', '10:00-12:00', '12:00-2:00', '2:00-4:00', '4:00-6:00'];
+    var DAY_LABELS = {
+      'monday-tuesday': 'Monday - Tuesday',
+      'wednesday-thursday': 'Wednesday - Thursday',
+      'saturday-sunday': 'Saturday - Sunday'
+    };
+    var DAY_LABELS_BLOCK = DAY_LABELS;
+    var editingId = null;
+    var confirmCallback = null;
+    var copiedBuffer = [];
+
+    // ============================================================
+    // LOAD / SAVE
+    // ============================================================
+    function loadTimetable() {
+      try { return JSON.parse(localStorage.getItem(TIMETABLE_KEY)) || []; } catch(e) { return []; }
+    }
+    function saveTimetable(data) {
+      localStorage.setItem(TIMETABLE_KEY, JSON.stringify(data));
+    }
+    function loadTrash() {
+      try { return JSON.parse(localStorage.getItem(TRASH_KEY)) || []; } catch(e) { return []; }
+    }
+    function saveTrash(data) {
+      localStorage.setItem(TRASH_KEY, JSON.stringify(data));
+    }
+    function loadClasses() {
+      try { return JSON.parse(localStorage.getItem('classesData')) || []; } catch(e) { return []; }
+    }
+    function loadStudents() {
+      try { return JSON.parse(localStorage.getItem('studentsData')) || []; } catch(e) { return []; }
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(msg, type) {
+      if (!type) type = 'success';
+      var icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+      var el = document.getElementById('toast');
+      document.getElementById('toastIcon').className = 'fas ' + (icons[type] || 'fa-check-circle');
+      document.getElementById('toastMessage').textContent = msg;
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(function() { el.classList.remove('show'); }, 2800);
+    }
+
+    // ============================================================
+    // MODAL HELPERS
+    // ============================================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function showConfirm(title, msg, icon, callback) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMsg').textContent = msg;
+      if (icon === 'danger') {
+        document.getElementById('confirmIcon').innerHTML = '<i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>';
+        document.getElementById('confirmIcon').className = 'w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4';
+      } else {
+        document.getElementById('confirmIcon').innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>';
+        document.getElementById('confirmIcon').className = 'w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4';
+      }
+      confirmCallback = callback;
+      openModal('confirmModal');
+    }
+
+    document.getElementById('confirmYesBtn').addEventListener('click', function() {
+      closeModal('confirmModal');
+      if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+    });
+    document.getElementById('confirmNoBtn').addEventListener('click', function() {
+      closeModal('confirmModal');
+      confirmCallback = null;
+    });
+
+    // ============================================================
+    // POPULATE DROPDOWNS
+    // ============================================================
+    function populateDropdowns() {
+      var classes = loadClasses();
+      var students = loadStudents();
+      var slots = loadTimetable();
+
+      var subjects = {};
+      students.forEach(function(s) { if (s.subject) subjects[s.subject] = true; });
+      slots.forEach(function(s) { if (s.subject) subjects[s.subject] = true; });
+
+      var classNames = {};
+      classes.forEach(function(c) { if (c.name) classNames[c.name] = true; });
+      slots.forEach(function(s) { if (s['class']) classNames[s['class']] = true; });
+
+      var trainers = {};
+      slots.forEach(function(s) { if (s.trainer) trainers[s.trainer] = true; });
+      classes.forEach(function(c) { if (c.trainer) trainers[c.trainer] = true; });
+
+      var trainerSelect = document.getElementById('inputTrainer');
+      trainerSelect.innerHTML = '<option value="">Select Trainer</option>';
+      Object.keys(trainers).sort().forEach(function(t) {
+        var opt = document.createElement('option');
+        opt.value = t; opt.textContent = t;
+        trainerSelect.appendChild(opt);
+      });
+
+      var seen = {};
+      var select = document.getElementById('inputSubjectClass');
+      var val = select.value;
+      select.innerHTML = '<option value="">Select Subject / Class</option>';
+      addOpt('Artificial Intelligence');
+      function addOpt(name) {
+        if (name && !seen[name]) {
+          seen[name] = true;
+          var opt = document.createElement('option');
+          opt.value = opt.textContent = name;
+          select.appendChild(opt);
+        }
+      }
+      slots.forEach(function(s) { addOpt(s.subject); addOpt(s['class']); });
+      students.forEach(function(s) { addOpt(s.subject); addOpt(s['class']); });
+      if (val) select.value = val;
+    }
+
+    // ============================================================
+    // POPULATE FILTER DROPDOWNS
+    // ============================================================
+    function populateFilterDropdowns() {
+      var slots = loadTimetable();
+      var classes = loadClasses();
+
+      function repopulate(id, options, label) {
+        var sel = document.getElementById(id);
+        var val = sel.value;
+        sel.innerHTML = '<option value="all">All ' + label + '</option>';
+        options.sort().forEach(function(o) {
+          var opt = document.createElement('option');
+          opt.value = o.value; opt.textContent = o.label;
+          sel.appendChild(opt);
+        });
+        if (val !== 'all') {
+          var match = false;
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === val) { match = true; break; }
+          }
+          sel.value = match ? val : 'all';
+        }
+      }
+
+      var subjects = {}; var trainers = {}; var classNames = {}; var days = {}; var times = {};
+      slots.forEach(function(s) {
+        if (s.subject) subjects[s.subject] = true;
+        if (s.trainer) trainers[s.trainer] = true;
+        if (s['class']) classNames[s['class']] = true;
+        if (s.day) days[s.day] = DAY_LABELS_BLOCK[s.day] || s.day;
+        if (s.time) times[s.time] = true;
+      });
+      classes.forEach(function(c) {
+        if (c.name) classNames[c.name] = true;
+      });
+
+      var subjectOpts = []; for (var k in subjects) subjectOpts.push({ value: k, label: k });
+      repopulate('filterSubject', subjectOpts, 'Classes');
+
+      var trainerOpts = []; for (var k in trainers) trainerOpts.push({ value: k, label: k });
+      repopulate('filterTrainer', trainerOpts, 'Trainers');
+
+      var dayOpts = []; for (var k in days) dayOpts.push({ value: k, label: days[k] });
+      repopulate('filterDay', dayOpts, 'Days');
+
+      var timeOpts = []; for (var k in times) timeOpts.push({ value: k, label: k });
+      repopulate('filterTime', timeOpts, 'Times');
+    }
+
+    // ============================================================
+    // CONFLICT CHECKING
+    // ============================================================
+    function checkConflict(slot, excludeId) {
+      var slots = loadTimetable();
+      var warnings = [];
+      for (var i = 0; i < slots.length; i++) {
+        var s = slots[i];
+        if (excludeId && s.id === excludeId) continue;
+        if (s.day !== slot.day || s.time !== slot.time) continue;
+
+        if (s.trainer && slot.trainer && s.trainer.toLowerCase() === slot.trainer.toLowerCase()) {
+          warnings.push('Trainer "' + s.trainer + '" is already assigned to ' + s.subject + ' at this time.');
+        }
+        if (s.room && slot.room && s.room.toLowerCase() === slot.room.toLowerCase()) {
+          warnings.push('Room/Lab "' + s.room + '" is already occupied by ' + s.subject + ' at this time.');
+        }
+        if (s['class'] && slot['class'] && s['class'].toLowerCase() === slot['class'].toLowerCase()) {
+          warnings.push('Class "' + s['class'] + '" already has ' + s.subject + ' scheduled at this time.');
+        }
+      }
+      return warnings;
+    }
+
+    function showConflictWarning(warnings) {
+      var el = document.getElementById('conflictWarning');
+      var msg = document.getElementById('conflictMsg');
+      msg.innerHTML = '<strong>Conflicts detected:</strong><br>' + warnings.join('<br>');
+      el.classList.remove('hidden');
+    }
+
+    // ============================================================
+    // RENDER TIMETABLE
+    // ============================================================
+    function renderTimetable() {
+      var slots = loadTimetable();
+      var gridEl = document.getElementById('timetableGrid');
+      var hasSlots = slots.length > 0;
+
+      gridEl.innerHTML = '';
+      gridEl.appendChild(createHeader('Time'));
+      gridEl.appendChild(createHeader('Monday - Tuesday'));
+      gridEl.appendChild(createHeader('Wednesday - Thursday'));
+      gridEl.appendChild(createHeader('Saturday - Sunday'));
+
+      var filterSubject = document.getElementById('filterSubject').value;
+      var filterTrainer = document.getElementById('filterTrainer').value;
+      var filterDay = document.getElementById('filterDay').value;
+      var filterTime = document.getElementById('filterTime').value;
+      var searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      var filtered = slots.filter(function(s) {
+        if (filterSubject !== 'all' && s.subject !== filterSubject) return false;
+        if (filterTrainer !== 'all' && s.trainer !== filterTrainer) return false;
+        if (filterDay !== 'all' && s.day !== filterDay) return false;
+        if (filterTime !== 'all' && s.time !== filterTime) return false;
+        if (searchQuery) {
+          var match = s.subject.toLowerCase().indexOf(searchQuery) !== -1 ||
+                       (s.subjectCode || '').toLowerCase().indexOf(searchQuery) !== -1 ||
+                       s.trainer.toLowerCase().indexOf(searchQuery) !== -1 ||
+                       (s['class'] || '').toLowerCase().indexOf(searchQuery) !== -1 ||
+                       (s.room || '').toLowerCase().indexOf(searchQuery) !== -1;
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      var grid = {};
+      DAYS.forEach(function(d) { grid[d] = {}; });
+      filtered.forEach(function(s) {
+        if (!grid[s.day]) grid[s.day] = {};
+        if (!grid[s.day][s.time]) grid[s.day][s.time] = [];
+        grid[s.day][s.time].push(s);
+      });
+
+      TIMES.forEach(function(time) {
+        var timeCell = document.createElement('div');
+        timeCell.className = 'timetable-time-header';
+        timeCell.textContent = time;
+        timeCell.style.fontSize = '11px';
+        gridEl.appendChild(timeCell);
+
+        DAYS.forEach(function(day) {
+          var cell = document.createElement('div');
+          cell.style.cssText = 'min-height:80px;padding:4px;display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,0.02);border-radius:4px';
+
+          var daySlots = grid[day] && grid[day][time] ? grid[day][time] : [];
+          daySlots.forEach(function(s) {
+            var card = document.createElement('div');
+            card.className = 'slot-card';
+            var statusClass = (s.status || 'Active').toLowerCase();
+            card.innerHTML =
+              '<div class="slot-status ' + statusClass + '">' + (s.status || 'Active') + '</div>' +
+              '<div class="slot-subject">' + (s.subject || s['class'] || 'N/A') + '</div>' +
+              '<div class="slot-code">' + (s.subjectCode || '') + '</div>' +
+              '<div class="slot-detail"><i class="fas fa-user"></i>' + s.trainer + '</div>' +
+              '<div class="slot-detail"><i class="fas fa-door-open"></i>' + (s.room || 'N/A') + '</div>';
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.className = 'absolute bottom-2 right-2 w-5 h-5 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition cursor-pointer text-xs';
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt" style="font-size:8px"></i>';
+            deleteBtn.title = 'Delete slot';
+            deleteBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              deleteSlot(s.id);
+            });
+            card.appendChild(deleteBtn);
+
+            card.addEventListener('dblclick', function() {
+              openEditModal(s.id);
+            });
+
+            cell.appendChild(card);
+          });
+
+          gridEl.appendChild(cell);
+        });
+      });
+
+      document.getElementById('emptyState').style.display = hasSlots && filtered.length === 0 && searchQuery ? 'block' : hasSlots ? 'none' : 'block';
+      updateTrashCount();
+    }
+
+    function createHeader(text) {
+      var div = document.createElement('div');
+      div.className = 'timetable-header';
+      div.textContent = text;
+      return div;
+    }
+
+    // ============================================================
+    // ADD / EDIT SLOT
+    // ============================================================
+    function resetModal() {
+      editingId = null;
+      document.getElementById('modalTitle').innerHTML = '<i class="fas fa-calendar-plus mr-2"></i>Add Timetable Slot';
+      document.getElementById('saveSlotBtn').innerHTML = '<i class="fas fa-save"></i> Save Slot';
+      document.getElementById('inputSubject').value = '';
+      document.getElementById('inputSubjectCode').value = '';
+      document.getElementById('inputTrainer').value = '';
+      document.getElementById('inputClass').value = '';
+      document.getElementById('inputDay').value = '';
+      document.getElementById('inputTime').value = '';
+      document.getElementById('inputRoom').value = '';
+      document.getElementById('inputStatus').value = 'Active';
+      document.getElementById('inputSubjectClass').value = '';
+      document.getElementById('conflictWarning').classList.add('hidden');
+    }
+
+    function openEditModal(id) {
+      var slots = loadTimetable();
+      var slot = null;
+      for (var i = 0; i < slots.length; i++) {
+        if (slots[i].id === id) { slot = slots[i]; break; }
+      }
+      if (!slot) return;
+      editingId = id;
+      document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit mr-2"></i>Edit Timetable Slot';
+      document.getElementById('saveSlotBtn').innerHTML = '<i class="fas fa-edit"></i> Update Slot';
+      var sub = slot.subject || '';
+      document.getElementById('inputSubject').value = sub;
+      document.getElementById('inputSubjectCode').value = slot.subjectCode || '';
+      document.getElementById('inputTrainer').value = slot.trainer || '';
+      document.getElementById('inputClass').value = slot['class'] || '';
+      document.getElementById('inputDay').value = slot.day || '';
+      document.getElementById('inputTime').value = slot.time || '';
+      document.getElementById('inputRoom').value = slot.room || '';
+      document.getElementById('inputStatus').value = slot.status || 'Active';
+      document.getElementById('inputSubjectClass').value = sub;
+      openModal('slotModal');
+    }
+
+    function collectSlotData() {
+      var subject = document.getElementById('inputSubject').value.trim();
+      var subjectCode = document.getElementById('inputSubjectCode').value.trim();
+      var trainer = document.getElementById('inputTrainer').value.trim();
+      var cls = document.getElementById('inputClass').value.trim();
+      var day = document.getElementById('inputDay').value;
+      var time = document.getElementById('inputTime').value;
+      var room = document.getElementById('inputRoom').value.trim();
+      var status = document.getElementById('inputStatus').value;
+
+      if (!subject || !subjectCode || !trainer || !cls || !day || !time || !room) {
+        showToast('Please fill all fields', 'error');
+        return null;
+      }
+      return { subject: subject, subjectCode: subjectCode, trainer: trainer, 'class': cls, day: day, time: time, room: room, status: status };
+    }
+
+    function syncClassesFromTimetable() {
+      var slots = loadTimetable();
+      var classes = [];
+      try { classes = JSON.parse(localStorage.getItem('classesData')) || []; } catch(e) { classes = []; }
+      var existing = {};
+      classes.forEach(function(c) { existing[c.name.toLowerCase()] = true; });
+      var changed = false;
+      slots.forEach(function(s) {
+        if (s['class'] && !existing[s['class'].toLowerCase()]) {
+          classes.push({ name: s['class'], trainer: s.trainer || '', subject: s.subject || '' });
+          existing[s['class'].toLowerCase()] = true;
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem('classesData', JSON.stringify(classes));
+      }
+    }
+
+    function saveSlot() {
+      var data = collectSlotData();
+      if (!data) return;
+
+      var conflicts = checkConflict(data, editingId);
+      if (conflicts.length > 0) {
+        showConflictWarning(conflicts);
+        showToast('Cannot save: Conflicts detected', 'error');
+        return;
+      }
+
+      var slots = loadTimetable();
+      if (editingId) {
+        for (var i = 0; i < slots.length; i++) {
+          if (slots[i].id === editingId) {
+            slots[i].subject = data.subject;
+            slots[i].subjectCode = data.subjectCode;
+            slots[i].trainer = data.trainer;
+            slots[i]['class'] = data['class'];
+            slots[i].day = data.day;
+            slots[i].time = data.time;
+            slots[i].room = data.room;
+            slots[i].status = data.status;
+            break;
+          }
+        }
+        showToast('Slot updated successfully', 'success');
+      } else {
+        data.id = 'slot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        slots.push(data);
+        showToast('Slot added successfully', 'success');
+      }
+
+      saveTimetable(slots);
+      syncClassesFromTimetable();
+      closeModal('slotModal');
+      populateDropdowns();
+      populateFilterDropdowns();
+      renderTimetable();
+    }
+
+    // ============================================================
+    // DELETE / RESTORE
+    // ============================================================
+    function deleteSlot(id) {
+      showConfirm('Delete Timetable Slot?', 'This slot will be moved to Timetable Trash. You can restore it later.', 'danger', function() {
+        var slots = loadTimetable();
+        var trash = loadTrash();
+        var idx = -1;
+        for (var i = 0; i < slots.length; i++) {
+          if (slots[i].id === id) { idx = i; break; }
+        }
+        if (idx === -1) return;
+        var slot = slots.splice(idx, 1)[0];
+        slot.deletedAt = new Date().toISOString();
+        trash.push(slot);
+        saveTimetable(slots);
+        saveTrash(trash);
+        populateFilterDropdowns();
+        renderTimetable();
+        renderTrashList();
+        showToast('Slot moved to trash', 'info');
+      });
+    }
+
+    function restoreSlot(id) {
+      var trash = loadTrash();
+      var slot = null;
+      for (var i = 0; i < trash.length; i++) {
+        if (trash[i].id === id) { slot = trash[i]; break; }
+      }
+      if (!slot) return;
+      showConfirm('Restore Slot?', 'Restore "' + slot.subject + '" (' + slot.subjectCode + ') back to the timetable?', 'info', function() {
+        trash = loadTrash();
+        var slots = loadTimetable();
+        var idx = -1;
+        for (var i = 0; i < trash.length; i++) {
+          if (trash[i].id === id) { idx = i; break; }
+        }
+        if (idx === -1) return;
+        var s = trash.splice(idx, 1)[0];
+        delete s.deletedAt;
+        var conflicts = checkConflict(s);
+        if (conflicts.length > 0) {
+          showToast('Cannot restore: ' + conflicts[0], 'error');
+          trash.push(s);
+          saveTrash(trash);
+          return;
+        }
+        slots.push(s);
+        saveTimetable(slots);
+        saveTrash(trash);
+        renderTrashList();
+        populateFilterDropdowns();
+        renderTimetable();
+        showToast('Slot restored successfully', 'success');
+      });
+    }
+
+    function deletePermanently(id) {
+      var trash = loadTrash();
+      var slot = null;
+      for (var i = 0; i < trash.length; i++) {
+        if (trash[i].id === id) { slot = trash[i]; break; }
+      }
+      if (!slot) return;
+      showConfirm('Delete Permanently?', 'Permanently delete "' + slot.subject + '" (' + slot.subjectCode + ')? This cannot be undone.', 'danger', function() {
+        trash = loadTrash();
+        trash = trash.filter(function(s) { return s.id !== id; });
+        saveTrash(trash);
+        renderTrashList();
+        showToast('Slot permanently deleted', 'warning');
+      });
+    }
+
+    function restoreAllSlots() {
+      var trash = loadTrash();
+      if (trash.length === 0) { showToast('Trash is empty', 'info'); return; }
+      showConfirm('Restore All?', 'Restore all ' + trash.length + ' trashed slots back to the timetable?', 'info', function() {
+        trash = loadTrash();
+        var slots = loadTimetable();
+        var restored = [];
+        var failed = [];
+        trash.forEach(function(slot) {
+          var c = checkConflict(slot);
+          if (c.length === 0) {
+            delete slot.deletedAt;
+            slots.push(slot);
+            restored.push(slot);
+          } else {
+            failed.push(slot);
+          }
+        });
+        saveTimetable(slots);
+        saveTrash(failed);
+        renderTrashList();
+        populateFilterDropdowns();
+        renderTimetable();
+        if (restored.length > 0) showToast(restored.length + ' slot(s) restored', 'success');
+        if (failed.length > 0) showToast(failed.length + ' slot(s) could not be restored due to conflicts', 'error');
+      });
+    }
+
+    // ============================================================
+    // TRASH UI
+    // ============================================================
+    function renderTrashList() {
+      var trash = loadTrash();
+      var list = document.getElementById('trashList');
+      var empty = document.getElementById('trashEmpty');
+      list.innerHTML = '';
+      if (trash.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      trash.forEach(function(s) {
+        var div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20';
+        div.innerHTML =
+          '<div class="flex items-center gap-3 flex-1">' +
+            '<i class="fas fa-calendar-times text-red-400"></i>' +
+            '<div>' +
+              '<p class="text-sm font-medium text-black/80 dark:text-white/80">' + s.subject + ' <span class="text-xs text-black/40">(' + (s.subjectCode || '') + ')</span></p>' +
+              '<p class="text-xs text-black/50 dark:text-white/50">' + DAY_LABELS[s.day] + ' | ' + s.time + ' | ' + s.trainer + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="flex gap-2">' +
+            '<button class="restore-slot pill-btn bg-green-100 text-green-700 hover:bg-green-200 text-xs px-3 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5" data-id="' + s.id + '"><i class="fas fa-undo"></i> Restore</button>' +
+            '<button class="delete-perm pill-btn bg-red-100 text-red-600 hover:bg-red-200 text-xs px-3 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5" data-id="' + s.id + '"><i class="fas fa-trash-alt"></i> Delete</button>' +
+          '</div>';
+        list.appendChild(div);
+      });
+      updateTrashCount();
+    }
+
+    function updateTrashCount() {
+      var trash = loadTrash();
+      var countEl = document.getElementById('trashCount');
+      if (countEl) countEl.textContent = trash.length;
+    }
+
+    // ============================================================
+    // BULK TRASH MODAL
+    // ============================================================
+    function renderBulkTrashList() {
+      var slots = loadTimetable();
+      var list = document.getElementById('bulkTrashList');
+      var empty = document.getElementById('bulkTrashEmpty');
+      var selectAll = document.getElementById('selectAllSlots');
+      list.innerHTML = '';
+      if (slots.length === 0) {
+        empty.classList.remove('hidden');
+        selectAll.checked = false;
+        selectAll.disabled = true;
+        return;
+      }
+      empty.classList.add('hidden');
+      selectAll.disabled = false;
+      selectAll.checked = false;
+      slots.forEach(function(s) {
+        var div = document.createElement('div');
+        div.className = 'flex items-center gap-3 p-3 rounded-xl border border-black/10 bg-white dark:bg-[#1a1a30] dark:border-white/10';
+        div.innerHTML =
+          '<input type="checkbox" class="slot-check w-4 h-4 rounded border-black/20 cursor-pointer" data-id="' + s.id + '" />' +
+          '<div class="flex-1">' +
+            '<p class="text-sm font-medium text-black/80 dark:text-white/80">' + s.subject + ' <span class="text-xs text-black/40">(' + (s.subjectCode || '') + ')</span></p>' +
+            '<p class="text-xs text-black/50 dark:text-white/50">' + DAY_LABELS[s.day] + ' | ' + s.time + ' | ' + s.trainer + ' | ' + (s.room || 'N/A') + '</p>' +
+          '</div>';
+        list.appendChild(div);
+      });
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      var checked = document.querySelectorAll('.slot-check:checked').length;
+      document.getElementById('selectedTrashCount').textContent = checked;
+    }
+
+    function bulkMoveToTrash() {
+      var checked = document.querySelectorAll('.slot-check:checked');
+      if (checked.length === 0) {
+        showToast('No slots selected', 'info');
+        return;
+      }
+      var ids = [];
+      checked.forEach(function(cb) { ids.push(cb.getAttribute('data-id')); });
+      var slots = loadTimetable();
+      var trash = loadTrash();
+      var moved = 0;
+      ids.forEach(function(id) {
+        for (var i = slots.length - 1; i >= 0; i--) {
+          if (slots[i].id === id) {
+            var slot = slots.splice(i, 1)[0];
+            slot.deletedAt = new Date().toISOString();
+            trash.push(slot);
+            moved++;
+            break;
+          }
+        }
+      });
+      saveTimetable(slots);
+      saveTrash(trash);
+      populateFilterDropdowns();
+      renderTimetable();
+      renderTrashList();
+      renderBulkTrashList();
+      closeModal('bulkTrashModal');
+      showToast(moved + ' slot(s) moved to trash', 'info');
+    }
+
+    // ============================================================
+    // VIEW TRASH MODAL
+    // ============================================================
+    function renderViewTrashList() {
+      var trash = loadTrash();
+      var list = document.getElementById('viewTrashList');
+      var empty = document.getElementById('viewTrashEmpty');
+      var countEl = document.getElementById('viewTrashCount');
+      list.innerHTML = '';
+      if (trash.length === 0) {
+        empty.classList.remove('hidden');
+        countEl.textContent = '0 item(s)';
+        return;
+      }
+      empty.classList.add('hidden');
+      countEl.textContent = trash.length + ' item(s)';
+      trash.forEach(function(s) {
+        var div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20';
+        div.innerHTML =
+          '<div class="flex items-center gap-3 flex-1">' +
+            '<i class="fas fa-calendar-times text-red-400"></i>' +
+            '<div>' +
+              '<p class="text-sm font-medium text-black/80 dark:text-white/80">' + s.subject + ' <span class="text-xs text-black/40">(' + (s.subjectCode || '') + ')</span></p>' +
+              '<p class="text-xs text-black/50 dark:text-white/50">' + DAY_LABELS[s.day] + ' | ' + s.time + ' | ' + s.trainer + ' | ' + (s.room || 'N/A') + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<button class="restore-from-view pill-btn bg-green-100 text-green-700 hover:bg-green-200 text-xs px-3 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5 transition-all" data-id="' + s.id + '"><i class="fas fa-undo"></i> Restore</button>';
+        list.appendChild(div);
+      });
+    }
+
+    function restoreFromView(id) {
+      var trash = loadTrash();
+      var slot = null;
+      for (var i = 0; i < trash.length; i++) {
+        if (trash[i].id === id) { slot = trash[i]; break; }
+      }
+      if (!slot) return;
+      showConfirm('Restore Slot?', 'Restore "' + slot.subject + '" (' + slot.subjectCode + ') back to the timetable?', 'info', function() {
+        trash = loadTrash();
+        var slots = loadTimetable();
+        var idx = -1;
+        for (var i = 0; i < trash.length; i++) {
+          if (trash[i].id === id) { idx = i; break; }
+        }
+        if (idx === -1) return;
+        var s = trash.splice(idx, 1)[0];
+        delete s.deletedAt;
+        var conflicts = checkConflict(s);
+        if (conflicts.length > 0) {
+          showToast('Cannot restore: ' + conflicts[0], 'error');
+          trash.push(s);
+          saveTrash(trash);
+          return;
+        }
+        slots.push(s);
+        saveTimetable(slots);
+        saveTrash(trash);
+        renderTrashList();
+        populateFilterDropdowns();
+        renderTimetable();
+        renderViewTrashList();
+        showToast('Slot restored successfully', 'success');
+      });
+    }
+
+    // ============================================================
+    // COPY PREVIOUS WEEK
+    // ============================================================
+    function copyPreviousWeek() {
+      var slots = loadTimetable();
+      if (slots.length === 0) {
+        showToast('No slots to copy', 'info');
+        return;
+      }
+      showConfirm('Copy Previous Timetable?', 'This will copy slot data into the Add Slot form. Each time you click Add Slot, one slot\'s data will be pre-filled.', 'info', function() {
+        copiedBuffer = slots.map(function(s) { return JSON.parse(JSON.stringify(s)); });
+        showToast(copiedBuffer.length + ' slot(s) ready to paste. Click Add Slot to start.', 'success');
+      });
+    }
+
+    // ============================================================
+    // EXPORT
+    // ============================================================
+    function exportImage(format) {
+      var wrapper = document.getElementById('timetableWrapper');
+      var grid = document.getElementById('timetableGrid');
+      var originalOverflow = wrapper.style.overflow;
+      wrapper.style.overflow = 'visible';
+      html2canvas(grid, {
+        scale: 2,
+        backgroundColor: document.body.classList.contains('dark-mode') ? '#0d0d1a' : '#ffffff',
+        useCORS: true,
+        logging: false
+      }).then(function(canvas) {
+        wrapper.style.overflow = originalOverflow;
+        if (format === 'png') {
+          var link = document.createElement('a');
+          link.download = 'timetable.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } else if (format === 'jpeg') {
+          var link = document.createElement('a');
+          link.download = 'timetable.jpg';
+          link.href = canvas.toDataURL('image/jpeg', 0.95);
+          link.click();
+} else if (format === 'pdf') {
+      var imgData = canvas.toDataURL('image/png');
+      var jsPDF = window.jsPDF;
+      var pdf = new jsPDF('l', 'mm', 'a4');
+      var pdfWidth = pdf.internal.pageSize.getWidth();
+      var pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('timetable.pdf');
+    }
+        showToast('Exported as ' + format.toUpperCase(), 'success');
+      });
+    }
+
+    // ============================================================
+    // DARK MODE
+    // ============================================================
+    var toggleModeBtn = document.getElementById('toggleModeBtn');
+    var modeIcon = document.getElementById('modeIcon');
+    var isDark = localStorage.getItem('timetableDarkMode') === 'true';
+    if (isDark) {
+      modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+      document.body.classList.add('dark-mode');
+    }
+    toggleModeBtn.addEventListener('click', function() {
+      isDark = !isDark;
+      localStorage.setItem('timetableDarkMode', isDark);
+      if (isDark) {
+        modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        document.body.classList.add('dark-mode');
+      } else {
+        modeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        document.body.classList.remove('dark-mode');
+      }
+    });
+
+    // ============================================================
+    // DATE
+    // ============================================================
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      window.location.href = 'sign-page.html';
+    });
+
+    // ============================================================
+    // EVENT BINDINGS
+    // ============================================================
+    document.getElementById('addSlotBtn').addEventListener('click', function() {
+      resetModal();
+      populateDropdowns();
+      if (copiedBuffer.length > 0) {
+        var data = copiedBuffer.shift();
+        var dsub = data.subject || '';
+        document.getElementById('inputSubject').value = dsub;
+        document.getElementById('inputSubjectCode').value = data.subjectCode || '';
+        document.getElementById('inputTrainer').value = data.trainer || '';
+        document.getElementById('inputClass').value = data['class'] || '';
+        document.getElementById('inputDay').value = data.day || '';
+        document.getElementById('inputTime').value = data.time || '';
+        document.getElementById('inputRoom').value = data.room || '';
+        document.getElementById('inputStatus').value = data.status || 'Active';
+        document.getElementById('inputSubjectClass').value = dsub;
+        if (copiedBuffer.length > 0) {
+          showToast(copiedBuffer.length + ' more slot(s) remaining. Click Add Slot again.', 'info');
+        }
+      }
+      openModal('slotModal');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', function() {
+      closeModal('slotModal');
+    });
+    document.getElementById('cancelModalBtn').addEventListener('click', function() {
+      closeModal('slotModal');
+    });
+    document.getElementById('slotModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('slotModal');
+    });
+    document.getElementById('saveSlotBtn').addEventListener('click', saveSlot);
+    document.getElementById('inputSubjectClass').addEventListener('change', function() {
+      var v = this.value;
+      document.getElementById('inputSubject').value = v;
+      document.getElementById('inputClass').value = v;
+    });
+
+    // Filters
+    ['filterSubject', 'filterTrainer', 'filterDay', 'filterTime'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', function() {
+        renderTimetable();
+      });
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', function() {
+      renderTimetable();
+    });
+
+    // Export
+    document.getElementById('exportBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('exportDropdown');
+      dd.classList.toggle('show');
+    });
+
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('exportDropdown');
+  if (dd && dd.classList.contains('show')) dd.classList.remove('show');
+});
+
+    document.querySelectorAll('.export-option').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        exportImage(this.dataset.format);
+        document.getElementById('exportDropdown').classList.remove('show');
+      });
+    });
+
+    // Copy previous
+    document.getElementById('copyPrevBtn').addEventListener('click', copyPreviousWeek);
+
+    // Trash handlers
+    document.getElementById('bulkTrashBtn').addEventListener('click', function() {
+      renderBulkTrashList();
+      openModal('bulkTrashModal');
+    });
+
+    document.getElementById('showTrashBtn').addEventListener('click', function() {
+      renderViewTrashList();
+      openModal('viewTrashModal');
+    });
+
+    document.getElementById('closeViewTrashBtn').addEventListener('click', function() {
+      closeModal('viewTrashModal');
+    });
+    document.getElementById('cancelViewTrashBtn').addEventListener('click', function() {
+      closeModal('viewTrashModal');
+    });
+    document.getElementById('viewTrashModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('viewTrashModal');
+    });
+    document.getElementById('viewRestoreAllBtn').addEventListener('click', function() {
+      closeModal('viewTrashModal');
+      restoreAllSlots();
+    });
+    document.getElementById('viewTrashList').addEventListener('click', function(e) {
+      var btn = e.target.closest('.restore-from-view');
+      if (!btn) return;
+      var id = btn.getAttribute('data-id');
+      restoreFromView(id);
+    });
+
+    document.getElementById('closeBulkTrashBtn').addEventListener('click', function() {
+      closeModal('bulkTrashModal');
+    });
+    document.getElementById('cancelBulkTrashBtn').addEventListener('click', function() {
+      closeModal('bulkTrashModal');
+    });
+    document.getElementById('bulkTrashModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('bulkTrashModal');
+    });
+    document.getElementById('moveToTrashBtn').addEventListener('click', bulkMoveToTrash);
+    document.getElementById('selectAllSlots').addEventListener('change', function() {
+      var checked = this.checked;
+      document.querySelectorAll('.slot-check').forEach(function(cb) { cb.checked = checked; });
+      updateSelectedCount();
+    });
+    document.getElementById('bulkTrashList').addEventListener('change', function(e) {
+      if (e.target.classList.contains('slot-check')) updateSelectedCount();
+    });
+
+    document.getElementById('closeTrashBtn').addEventListener('click', function() {
+      document.getElementById('trashSection').classList.remove('show');
+    });
+
+    document.getElementById('restoreAllBtn').addEventListener('click', restoreAllSlots);
+
+    // Trash event delegation
+    document.getElementById('trashList').addEventListener('click', function(e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      var id = btn.getAttribute('data-id');
+      if (btn.classList.contains('restore-slot')) restoreSlot(id);
+      if (btn.classList.contains('delete-perm')) deletePermanently(id);
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    populateDropdowns();
+    populateFilterDropdowns();
+    renderTimetable();
+    renderTrashList();
+    (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+  </script>
+
+</body>
+</html>

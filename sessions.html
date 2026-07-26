@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sessions | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    .sidebar-link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .sidebar-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .sidebar-link.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+    .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .dark-mode main {
+      background-color: #0d0d1a;
+    }
+    .dark-mode #welcomeBox {
+      background-color: #1a1a30;
+    }
+    .dark-mode #welcomeBox,
+    .dark-mode #welcomeBox * {
+      color: white !important;
+    }
+    .att-session-badge { display: none!important; align-items: center; gap: 5px; padding: 2px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; background: #dcfce7; color: #16a34a; font-family: 'Inter', sans-serif; }
+    .att-session-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #16a34a; display: inline-block; flex-shrink: 0; }
+    .dark-mode .att-session-badge { background: #064e3b; color: #6ee7b7; }
+    .dark-mode .att-session-badge::before { background: #6ee7b7; }
+    .dark-mode main .bg-white {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode main .text-black,
+    .dark-mode main .text-black\/50,
+    .dark-mode main .text-black\/60,
+    .dark-mode main .text-black\/40 {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode .bg-\[\#D8E6FE\] {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode .bg-\[\#D8E6FE\] .text-black,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/50,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/60,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/70 {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode .bg-\[\#D8E6FE\] .text-lg,
+    .dark-mode .bg-\[\#D8E6FE\] .text-sm {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode input::placeholder,
+    .dark-mode select::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+    .dark-mode .bg-green-100 {
+      background-color: rgba(0,200,80,0.2) !important;
+    }
+    .dark-mode .text-green-700 {
+      color: #4ade80 !important;
+    }
+    .dark-mode .bg-red-100 {
+      background-color: rgba(255,50,50,0.2) !important;
+    }
+    .dark-mode .text-red-700 {
+      color: #f87171 !important;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      width: 90%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .dark-mode .modal-box {
+      background: #1a1a30;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .dark-mode .modal-box input,
+    .dark-mode .modal-box select {
+      background: #0d0d1a;
+      color: white;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .dark-mode .modal-box label {
+      color: rgba(255,255,255,0.85);
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="min-h-screen w-full flex">
+
+    <!-- Sidebar -->
+    <aside class="w-[220px] min-h-screen bg-[#131212] flex flex-col shrink-0">
+      <div class="flex flex-col items-center gap-2 px-6 pt-8 pb-6 border-b border-white/10">
+        <div class="w-16 h-16 md:w-[72px] md:h-[72px] relative shrink-0">
+          <img
+            src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
+            alt="Bano Qabil"
+            class="absolute inset-0 w-full h-full object-contain"
+            onerror="var p=this.parentElement;this.remove();var d=document.createElement('div');d.className='w-full h-full flex items-center justify-center bg-[#1a1a2e] rounded-full';d.textContent='BQ';d.style.cssText='font-size:28px;color:white;font-weight:700;font-family:&quot;Ibarra Real Nova&quot;,serif;display:flex;align-items:center;justify-content:center;width:100%;height:100%';p.appendChild(d)" />
+        </div>
+        <div class="text-center">
+          <p class="text-sm font-bold text-white leading-tight" style="font-family: 'Ibarra Real Nova', serif">BANO QABIL</p>
+          <p class="text-[11px] text-white/50 leading-tight" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+        </div>
+      </div>
+      <nav class="flex flex-col gap-1 px-3 py-6 flex-1">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="timetable.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span>Timetable</span>
+        </a>
+        <a href="classes.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span>Classes</span>
+        </a>
+        <a href="students.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="attendance.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>Attendance</span>
+        </a>
+        <a href="sessions.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>Session</span>
+        </a>
+        <a href="trash.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          <span>Trash</span>
+        </a>
+      </nav>
+      <div class="px-3 pb-5 border-t border-white/10 pt-4 flex flex-col gap-3">
+        <button id="logoutBtn" class="sidebar-link w-full cursor-pointer bg-transparent border-none text-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+        <div class="flex flex-col items-center pt-1">
+          <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+            <svg class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <p class="text-[12px] font-semibold text-white/60 tracking-wider uppercase" style="font-family: 'Inter', sans-serif">Team E Project</p>
+          <p class="text-[9px] text-white/30 mt-0.5 tracking-wide" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 bg-[#f5f5f5] min-h-screen p-4">
+
+      <!-- Top Welcome Box -->
+      <div id="welcomeBox" class="bg-[#D5D5D5] rounded-[16px] p-5 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-5">
+          <div class="w-[84px] h-[84px] flex items-center justify-center shrink-0">
+            <img src="src/Images/graduation-cap (1).png" alt="Graduation Cap" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <p class="text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <span id="activeSessionBadge" class="att-session-badge hidden"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <button id="toggleModeBtn" class="w-[40px] h-[40px] rounded-full bg-[#131212] flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" aria-label="Toggle dark mode">
+            <svg id="modeIcon" class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#131212]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <p id="currentDate" class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Session Button Section -->
+      <div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex items-center justify-between mb-3">
+        <div>
+          <p class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Manage Sessions</p>
+          <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Add, edit and organize your sessions</p>
+        </div>
+        <button id="addSessionBtn" class="bg-[#131212] text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add New Session
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3 flex-1">
+          <svg class="w-5 h-5 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" placeholder="Search sessions..." class="bg-transparent border-none outline-none text-sm text-black w-full" style="font-family: 'Inter', sans-serif" />
+          <svg id="viewToggleBtn" class="w-5 h-5 text-black/50 shrink-0 cursor-pointer hover:text-black transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="button" tabindex="0" aria-label="Toggle view">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Dynamic Classes Area -->
+      <div id="sessionCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div id="sessionEmptyPlaceholder" class="col-span-full flex flex-col items-center justify-center py-8">
+          <hr class="w-full border-t border-black/10 mb-4" />
+          <svg class="w-12 h-12 text-black/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+          </svg>
+          <p class="text-sm text-black/40 text-center" style="font-family: 'Inter', sans-serif">No data available</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="bg-[#D8E6FE] rounded-xl px-4 py-3 flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+          <p class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Create New Session</p>
+        </div>
+        <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+          <svg class="w-4 h-4 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Session Name</label>
+          <input id="inputSessionName" type="text" placeholder="e.g. session-01" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Duration</label>
+          <input id="inputDuration" type="text" placeholder="e.g. 3 Months" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Starting Month</label>
+          <input id="inputStartMonth" type="text" placeholder="e.g. January 2026" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Ending Month</label>
+          <input id="inputEndMonth" type="text" placeholder="e.g. March 2026" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Status</label>
+          <select id="inputStatus" class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif">
+            <option value="">Select Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="createClassBtn" class="w-full mt-6 bg-[#131212] text-white py-3 rounded-full text-sm font-semibold hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">
+        Create Session
+      </button>
+    </div>
+  </div>
+
+  <script>
+    var logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', function () {
+      window.location.href = 'sign-page.html';
+    });
+
+    var dateEl = document.getElementById('currentDate');
+    var now = new Date();
+    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateEl.textContent = now.toLocaleDateString('en-US', options);
+
+    var toggleModeBtn = document.getElementById('toggleModeBtn');
+    var modeIcon = document.getElementById('modeIcon');
+    var isDark = localStorage.getItem('sessionsDarkMode') === 'true';
+    if (isDark) {
+      modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+      document.body.classList.add('dark-mode');
+    }
+
+    toggleModeBtn.addEventListener('click', function () {
+      isDark = !isDark;
+      if (isDark) {
+        modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        document.body.classList.add('dark-mode');
+      } else {
+        modeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('sessionsDarkMode', isDark);
+    });
+
+    var modalOverlay = document.getElementById('modalOverlay');
+    var addSessionBtn = document.getElementById('addSessionBtn');
+    var closeModalBtn = document.getElementById('closeModalBtn');
+    var createClassBtn = document.getElementById('createClassBtn');
+    var sessionCardsContainer = document.getElementById('sessionCardsContainer');
+    var sessionEmptyPlaceholder = document.getElementById('sessionEmptyPlaceholder');
+
+    addSessionBtn.addEventListener('click', function () {
+      modalOverlay.classList.add('show');
+    });
+
+    closeModalBtn.addEventListener('click', function () {
+      modalOverlay.classList.remove('show');
+    });
+
+    modalOverlay.addEventListener('click', function (e) {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove('show');
+      }
+    });
+
+createClassBtn.addEventListener('click', function () {
+      var sessionName = document.getElementById('inputSessionName').value.trim();
+      var duration = document.getElementById('inputDuration').value.trim();
+      var startMonth = document.getElementById('inputStartMonth').value.trim();
+      var endMonth = document.getElementById('inputEndMonth').value.trim();
+      var status = document.getElementById('inputStatus').value;
+
+      if (!sessionName || !duration || !startMonth || !endMonth || !status) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      if (sessionEmptyPlaceholder) {
+        sessionEmptyPlaceholder.remove();
+      }
+
+      var card = document.createElement('div');
+      card.className = 'bg-[#D8E6FE] rounded-[16px] p-3 shadow-sm border border-black/5';
+      card.setAttribute('data-name', sessionName.toLowerCase());
+
+      card.innerHTML =
+        '<div class="flex items-start justify-between mb-3">' +
+          '<p class="text-base font-bold text-black" style="font-family: \'Ibarra Real Nova\', serif">' + sessionName + '</p>' +
+          '<span class="text-xs font-semibold px-3 py-1 rounded-full ' + (status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') + '" style="font-family: \'Inter\', sans-serif">' + status + '</span>' +
+        '</div>' +
+        '<div class="flex flex-col gap-2">' +
+          '<div class="flex items-center gap-2">' +
+            '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>' +
+            '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">Duration: ' + duration + '</span>' +
+          '</div>' +
+          '<div class="flex items-center gap-2">' +
+            '<svg class="w-4 h-4 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>' +
+            '<span class="text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + startMonth + ' - ' + endMonth + '</span>' +
+          '</div>' +
+        '</div>';
+
+      sessionCardsContainer.appendChild(card);
+
+      document.getElementById('inputSessionName').value = '';
+      document.getElementById('inputDuration').value = '';
+      document.getElementById('inputStartMonth').value = '';
+      document.getElementById('inputEndMonth').value = '';
+      document.getElementById('inputStatus').value = '';
+
+      modalOverlay.classList.remove('show');
+    });
+
+
+    (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+  </script>
+</body>
+</html>
+
+
+

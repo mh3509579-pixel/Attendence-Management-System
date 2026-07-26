@@ -1,0 +1,459 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&amp;family=Inter:wght@400;500;600&amp;family=Poppins:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    .sidebar-link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .sidebar-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .sidebar-link.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+    .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .dark-mode main {
+      background-color: #0d0d1a;
+    }
+    .dark-mode #welcomeBox {
+      background-color: #1a1a30;
+    }
+    .dark-mode #welcomeBox,
+    .dark-mode #welcomeBox * {
+      color: white !important;
+    }
+    .dark-mode main .bg-white {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode .bg-\[\#D8E6FE\] {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode main .text-black,
+    .dark-mode main .text-black\/50,
+    .dark-mode main .text-black\/60,
+    .dark-mode main .text-black\/40 {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .att-session-badge { display: none!important; align-items: center; gap: 5px; padding: 2px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; background: #dcfce7; color: #16a34a; font-family: 'Inter', sans-serif; }
+    .att-session-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #16a34a; display: inline-block; flex-shrink: 0; }
+    .dark-mode .att-session-badge { background: #064e3b; color: #6ee7b7; }
+    .dark-mode .att-session-badge::before { background: #6ee7b7; }
+
+
+    /* Sidebar Toggle */
+    .sidebar-collapsed .sidebar { width: 80px !important; min-width: 80px !important; }
+    .sidebar-collapsed .sidebar .logo-text,
+    .sidebar-collapsed .sidebar .nav-label,
+    .sidebar-collapsed .sidebar .bottom-label,
+    .sidebar-collapsed .sidebar .team-text,
+    .sidebar-collapsed .sidebar .sub-text { display: none !important; }
+    .sidebar-collapsed .sidebar .logo-img { width: 40px !important; height: 40px !important; }
+    .sidebar-collapsed .sidebar .logo-wrap { padding: 16px 0 12px !important; }
+    .sidebar-collapsed .sidebar .sidebar-link { justify-content: center; padding: 12px 0; }
+    .sidebar-collapsed .sidebar .sidebar-link svg { width: 22px; height: 22px; }
+    .sidebar-collapsed .sidebar .logout-section { align-items: center; }
+    .sidebar-collapsed .sidebar .logout-section button { justify-content: center; padding: 12px 0; }
+    .sidebar-collapsed .sidebar .logout-section button svg { width: 22px; height: 22px; }
+    .sidebar-collapsed .sidebar .nav-wrap { padding: 12px 8px; }
+    .sidebar-collapsed .sidebar .logo-circle { width: 40px; height: 40px; }
+    .sidebar { transition: width 0.3s ease, min-width 0.3s ease; }
+    .sidebar .sidebar-link { transition: all 0.3s ease; position: relative; }
+    .sidebar-collapsed .sidebar .sidebar-link[title]:hover::after {
+      content: attr(title);
+      position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+      background: #131212; color: white; padding: 6px 12px; border-radius: 8px;
+      font-size: 12px; font-family: 'Inter', sans-serif; white-space: nowrap;
+      z-index: 60; margin-left: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+    .stat-card { position:relative; cursor:pointer; }
+    .stat-tip {
+      display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      margin-top:8px; background:#131212; color:white; padding:14px 18px;
+      border-radius:12px; font-size:13px; font-family:'Inter',sans-serif;
+      white-space:nowrap; z-index:60; box-shadow:0 8px 24px rgba(0,0,0,0.3);
+      pointer-events:none; line-height:1.6; text-align:left;
+    }
+    .stat-tip::before {
+      content:''; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+      border:6px solid transparent; border-bottom-color:#131212;
+    }
+    .stat-card:hover .stat-tip { display:block; }
+    .dark-mode .stat-tip { background:#1a1a30; }
+    .dark-mode .stat-tip::before { border-bottom-color:#1a1a30; }
+    .stat-tip .num { color:#6ee7b7; font-weight:700; }
+    .stat-tip .sub { color:rgba(255,255,255,0.5); font-size:11px; }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 40;
+    }
+    .sidebar-overlay.show { display: block; }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: -260px; z-index: 50; transition: left 0.3s ease; }
+      .sidebar.mobile-open { left: 0; }
+      .sidebar-collapsed .sidebar { left: -260px; }
+      .sidebar-collapsed .sidebar.mobile-open { left: 0; width: 260px !important; min-width: 260px !important; }
+      .sidebar-collapsed .sidebar.mobile-open .logo-text,
+      .sidebar-collapsed .sidebar.mobile-open .nav-label { display: block !important; }
+      .sidebar-collapsed .sidebar.mobile-open .sidebar-link { justify-content: flex-start; padding: 12px 20px; }
+      .sidebar-collapsed .sidebar.mobile-open .sidebar-link svg { width: 20px; height: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen w-full flex">
+
+    <!-- Sidebar -->
+    <aside class="w-[220px] min-h-screen bg-[#131212] flex flex-col shrink-0">
+      <!-- Logo -->
+      <div class="flex flex-col items-center gap-2 px-6 pt-8 pb-6 border-b border-white/10">
+        <div class="w-16 h-16 md:w-[72px] md:h-[72px] relative shrink-0">
+          <img
+            src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
+            alt="Bano Qabil"
+            class="absolute inset-0 w-full h-full object-contain"
+            onerror="var p=this.parentElement;this.remove();var d=document.createElement('div');d.className='w-full h-full flex items-center justify-center bg-[#1a1a2e] rounded-full';d.textContent='BQ';d.style.cssText='font-size:28px;color:white;font-weight:700;font-family:&quot;Ibarra Real Nova&quot;,serif;display:flex;align-items:center;justify-content:center;width:100%;height:100%';p.appendChild(d)" />
+        </div>
+        <div class="text-center">
+          <p class="text-sm font-bold text-white leading-tight" style="font-family: 'Ibarra Real Nova', serif">
+            BANO QABIL
+          </p>
+          <p class="text-[11px] text-white/50 leading-tight" style="font-family: 'Inter', sans-serif">
+            Attendance Management System
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex flex-col gap-1 px-3 py-6 flex-1">
+        <a href="dashboard.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+          </svg>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a href="timetable.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span class="nav-label">Timetable</span>
+        </a>
+<a href="classes.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span class="nav-label">Classes</span>
+        </a>
+        <a href="students.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+          </svg>
+          <span class="nav-label">Students</span>
+        </a>
+        <a href="attendance.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span class="nav-label">Attendance</span>
+        </a>
+        <a href="sessions.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span class="nav-label">Session</span>
+        </a>
+        <a href="trash.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          <span class="nav-label">Trash</span>
+        </a>
+      </nav>
+
+      <!-- Bottom: Logout + Team E Project -->
+      <div class="px-3 pb-5 border-t border-white/10 pt-4 flex flex-col gap-3">
+        <button id="logoutBtn" class="sidebar-link w-full cursor-pointer bg-transparent border-none text-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+        <div class="flex flex-col items-center pt-1">
+          <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+            <svg class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <p class="text-[12px] font-semibold text-white/60 tracking-wider uppercase" style="font-family: 'Inter', sans-serif">Team E Project</p>
+          <p class="text-[9px] text-white/30 mt-0.5 tracking-wide" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 bg-[#f5f5f5] min-h-screen p-4">
+
+      <!-- Top Welcome Box -->
+      <div id="welcomeBox" class="bg-[#D5D5D5] rounded-[16px] p-5 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-5">
+          <div class="w-[84px] h-[84px] flex items-center justify-center shrink-0">
+            <img src="src/Images/graduation-cap (1).png" alt="Graduation Cap" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <p class="text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <span id="activeSessionBadge" class="att-session-badge hidden"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <button id="toggleModeBtn" class="w-[40px] h-[40px] rounded-full bg-[#131212] flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" aria-label="Toggle dark mode">
+            <svg id="modeIcon" class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#131212]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <p id="currentDate" class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif"></p>
+          </div>
+        </div>
+      </div>
+
+<!-- Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center stat-card">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <p class="text-sm text-black/50 mb-1" style="font-family: 'Inter', sans-serif">Total Students</p>
+          <p id="statStudents" class="text-3xl font-bold text-black" style="font-family: 'Ibarra Real Nova', serif">0</p>
+          <div id="tipStudents" class="stat-tip"></div>
+        </div>
+        <div class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center stat-card">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+          <p class="text-sm text-black/50 mb-1" style="font-family: 'Inter', sans-serif">Active Classes</p>
+          <p id="statClasses" class="text-3xl font-bold text-black" style="font-family: 'Ibarra Real Nova', serif">0</p>
+          <div id="tipClasses" class="stat-tip"></div>
+        </div>
+        <div class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center stat-card">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <p class="text-sm text-black/50 mb-1" style="font-family: 'Inter', sans-serif">Today's Attendance</p>
+          <p id="statAttendance" class="text-3xl font-bold text-black" style="font-family: 'Ibarra Real Nova', serif">0%</p>
+          <div id="tipAttendance" class="stat-tip"></div>
+        </div>
+        <div class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center stat-card">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <p class="text-sm text-black/50 mb-1" style="font-family: 'Inter', sans-serif">Attendance Info</p>
+          <p id="statSessions" class="text-3xl font-bold text-black" style="font-family: 'Ibarra Real Nova', serif">0</p>
+          <div id="tipInfo" class="stat-tip"></div>
+        </div>
+      </div>
+
+<!-- Action Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <a href="students.html" class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center hover:opacity-80 transition-all no-underline">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <p class="text-sm font-semibold text-black" style="font-family: 'Inter', sans-serif">Add Students</p>
+        </a>
+        <a href="classes.html" class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center hover:opacity-80 transition-all no-underline">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+          <p class="text-sm font-semibold text-black" style="font-family: 'Inter', sans-serif">Add Classes</p>
+        </a>
+        <a href="attendance.html" class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center hover:opacity-80 transition-all no-underline">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <p class="text-sm font-semibold text-black" style="font-family: 'Inter', sans-serif">Mark Attendance</p>
+        </a>
+        <a href="timetable.html" class="bg-[#D8E6FE] rounded-[16px] p-6 shadow-sm border border-black/5 flex flex-col items-center text-center hover:opacity-80 transition-all no-underline">
+          <svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <p class="text-sm font-semibold text-black" style="font-family: 'Inter', sans-serif">Add Timetable</p>
+        </a>
+      </div>
+
+      <!-- Dynamic Classes Area -->
+      <div id="classCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <div class="col-span-full flex flex-col items-center justify-center py-8">
+          <hr class="w-full border-t border-black/10 mb-4" />
+          <svg class="w-12 h-12 text-black/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+          </svg>
+          <p class="text-sm text-black/40 text-center" style="font-family: 'Inter', sans-serif">No data available</p>
+        </div>
+      </div></div>
+    </main>
+  </div>
+
+  <script>
+    var logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', function () {
+      window.location.href = 'sign-page.html';
+    });
+
+    var dateEl = document.getElementById('currentDate');
+    var now = new Date();
+    dateEl.textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+    var toggleModeBtn = document.getElementById('toggleModeBtn');
+    var modeIcon = document.getElementById('modeIcon');
+    var isDark = false;
+    toggleModeBtn.addEventListener('click', function () {
+      isDark = !isDark;
+      if (isDark) {
+        modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        document.body.classList.add('dark-mode');
+      } else {
+        modeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        document.body.classList.remove('dark-mode');
+      }
+    });
+
+    (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+
+    function ls(k){ try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; } }
+
+    function updateDashboard(){
+      var students = ls('studentsData');
+      var classes = ls('classesData');
+      var sessions = ls('attendanceSessions');
+
+      document.getElementById('statStudents').textContent = students.length;
+      document.getElementById('statClasses').textContent = classes.length;
+
+      var attPct = 0, totalRec = 0, sumRec = 0, attPresent = 0, attAbsent = 0, attLate = 0;
+      var std = {}; students.forEach(function(s){ std[s.id]=s; });
+      var byClassAtt = {};
+      sessions.forEach(function(s){
+        Object.keys(s.records||{}).forEach(function(sid){
+          var st=std[sid], cls=(st&&(st.subject||st.class))||'N/A';
+          if(!byClassAtt[cls]) byClassAtt[cls]={p:0,a:0,l:0,t:0};
+          var v=s.records[sid]; totalRec++;
+          if(v==='P'){ sumRec+=100; attPresent++; byClassAtt[cls].p++; }
+          else if(v==='L'){ sumRec+=50; attLate++; byClassAtt[cls].l++; }
+          else { attAbsent++; byClassAtt[cls].a++; }
+          byClassAtt[cls].t++;
+        });
+      });
+      if(totalRec>0) attPct = Math.round(sumRec/totalRec);
+      document.getElementById('statAttendance').textContent = attPct+'%';
+
+      var byClass={}, byTrainer={};
+      students.forEach(function(s){
+        var c=s.subject||s.class||'N/A';
+        byClass[c]=(byClass[c]||0)+1;
+        var t=s.trainer||'N/A';
+        byTrainer[t]=(byTrainer[t]||0)+1;
+      });
+      var tipS='<span class="sub">By Class</span><br>';
+      Object.keys(byClass).sort().forEach(function(k){ tipS+='<span class="num">'+byClass[k]+'</span> '+k+'<br>'; });
+      tipS+='<span class="sub">By Trainer</span><br>';
+      Object.keys(byTrainer).sort().forEach(function(k){ tipS+='<span class="num">'+byTrainer[k]+'</span> '+k+'<br>'; });
+      document.getElementById('tipStudents').innerHTML=tipS;
+
+      var tipC='';
+      classes.forEach(function(c){ tipC+='<span class="num">&bull;</span> '+(c.name||c)+'<br>'; });
+      if(!tipC) tipC='<span class="sub">No classes yet</span>';
+      tipC+='<br><span class="sub">Total: <span class="num">'+classes.length+'</span></span>';
+      document.getElementById('tipClasses').innerHTML=tipC;
+
+      var tipA='Overall — P: <span class="num">'+attPresent+'</span> A: <span class="num">'+attAbsent+'</span> L: <span class="num">'+attLate+'</span> (<span class="num">'+attPct+'%</span>)<br><br>';
+      Object.keys(byClassAtt).sort().forEach(function(k){
+        var c=byClassAtt[k], cp=c.t>0?Math.round((c.p*100+(c.l||0)*50)/c.t):0;
+        tipA+='<span class="sub">'+k+'</span><br>P: <span class="num">'+c.p+'</span> A: <span class="num">'+c.a+'</span> L: <span class="num">'+c.l+'</span> <span class="sub">('+cp+'%)</span><br>';
+      });
+      document.getElementById('tipAttendance').innerHTML=tipA;
+
+      document.getElementById('statSessions').textContent = sessions.length;
+      var byClassSess = {};
+      sessions.forEach(function(s){
+        var cls='Unknown';
+        Object.keys(s.records||{}).forEach(function(sid){
+          var st=std[sid];
+          if(st&&(st.subject||st.class)) cls=(st.subject||st.class);
+        });
+        if(!byClassSess[cls]) byClassSess[cls]={cur:0,prev:0,total:0};
+        byClassSess[cls].total++;
+      });
+      var curDate = new Date().toISOString().split('T')[0];
+      sessions.forEach(function(s){
+        var cls='Unknown';
+        Object.keys(s.records||{}).forEach(function(sid){
+          var st=std[sid];
+          if(st&&(st.subject||st.class)) cls=(st.subject||st.class);
+        });
+        if(s.date===curDate) byClassSess[cls].cur++;
+        else byClassSess[cls].prev++;
+      });
+      var tipI='<span class="sub">Current</span><br>';
+      Object.keys(byClassSess).sort().forEach(function(k){
+        tipI+='<span class="num">'+byClassSess[k].cur+'</span> '+k+'<br>';
+      });
+      tipI+='<br><span class="sub">Previous</span><br>';
+      Object.keys(byClassSess).sort().forEach(function(k){
+        tipI+='<span class="num">'+byClassSess[k].prev+'</span> '+k+'<br>';
+      });
+      document.getElementById('tipInfo').innerHTML=tipI;
+
+      var container=document.getElementById('classCardsContainer');
+      if(classes.length===0){
+        container.innerHTML='<div class="col-span-full flex flex-col items-center justify-center py-8"><hr class="w-full border-t border-black/10 mb-4"><svg class="w-12 h-12 text-black/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p class="text-sm text-black/40 text-center" style="font-family:\'Inter\',sans-serif">No data available</p></div>';
+      } else {
+        var html='';
+        classes.forEach(function(c){
+          var cname=c.name||c;
+          var count=0; students.forEach(function(s){ if(s.subject===cname||s.class===cname) count++; });
+          html+='<a href="classes.html" class="bg-[#D8E6FE] rounded-[16px] p-5 shadow-sm border border-black/5 flex flex-col items-center text-center hover:opacity-80 transition-all no-underline">';
+          html+='<svg class="w-8 h-8 text-black mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>';
+          html+='<p class="text-base font-bold text-black" style="font-family:\'Poppins\',sans-serif">'+cname+'</p>';
+          html+='<p class="text-xs text-black/50 mt-1" style="font-family:\'Inter\',sans-serif">'+count+' student'+(count!==1?'s':'')+'</p>';
+          html+='</a>';
+        });
+        container.innerHTML=html;
+      }
+    }
+
+    updateDashboard();
+    window.addEventListener('storage', updateDashboard);
+  </script>
+</body>
+</html>

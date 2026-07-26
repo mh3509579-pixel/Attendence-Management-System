@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&family=Inter:wght@400;500;600&family=Hedvig+Letters+Sans:wght@400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    .field-error {
+      color: #dc2626;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      display: none;
+      margin-top: 4px;
+    }
+    .field-error.visible { display: block; }
+
+    .input-error {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 1px #dc2626 !important;
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.35s ease;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .toast.success { background: #16a34a; }
+    .toast.error { background: #dc2626; }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Main Container -->
+  <div class="min-h-screen w-full flex flex-col md:flex-row bg-[#131212]">
+
+    <!-- Left Panel — Identity -->
+    <div class="flex flex-col items-center justify-center gap-6 bg-[#131212] px-8 py-12 md:py-0 md:w-1/2 lg:w-[55%]">
+      <div class="w-36 h-36 md:w-48 md:h-48 lg:w-[216px] lg:h-[216px] relative shrink-0">
+        <img
+          src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
+          alt="Bano Qabil Logo"
+          class="absolute inset-0 w-full h-full object-contain"
+           onerror="var p=this.parentElement;this.remove();var d=document.createElement('div');d.className='w-full h-full flex items-center justify-center bg-[#1a1a2e] rounded-full';d.textContent='BQ';d.style.cssText='font-size:60px;color:white;font-weight:700;font-family:&quot;Ibarra Real Nova&quot;,serif;display:flex;align-items:center;justify-content:center;width:100%;height:100%';p.appendChild(d)" />
+      </div>
+      <div class="text-center text-white">
+        <p class="text-2xl md:text-3xl lg:text-4xl font-bold leading-snug mb-0" style="font-family: 'Ibarra Real Nova', serif">
+          BANO QABIL
+        </p>
+        <p class="text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-0 text-gray-300" style="font-family: 'Ibarra Real Nova', serif">
+          FREE IT COURSES
+        </p>
+        <p class="text-base md:text-lg lg:text-xl font-bold leading-snug text-gray-400" style="font-family: 'Ibarra Real Nova', serif">
+          Attendence Management System
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Panel — Form -->
+    <div class="flex items-center justify-center bg-[#f5f5f5] px-6 py-12 md:py-0 md:w-1/2 lg:w-[45%] min-h-[60vh] md:min-h-screen">
+      <div class="w-full max-w-[440px] flex flex-col gap-10">
+
+        <!-- Header -->
+        <div class="flex flex-col items-center gap-2">
+          <!-- User Icon SVG -->
+          <div class="w-[72px] h-[72px] md:w-[92px] md:h-[92px] relative shrink-0">
+            <svg class="absolute inset-0 w-full h-full" fill="none" viewBox="0 0 92 92" preserveAspectRatio="xMidYMid meet">
+              <path d="M46.023 47.1845C59.8652 47.104 67.3172 39.629 67.574 25.4457C67.3363 11.799 59.4818 3.92533 45.977 3.83717C32.3265 3.9215 24.426 12.1555 24.426 25.4457C24.426 39.1345 32.3303 47.1078 46.023 47.1883V47.1845ZM45.977 11.5C55.3188 11.5613 59.7425 16.0348 59.9073 25.438C59.7272 35.2475 55.5642 39.4565 46.023 39.514C36.4588 39.4565 32.292 35.2667 32.0927 25.507C32.2843 15.8815 36.5815 11.5575 45.977 11.5Z" fill="black"/>
+              <path d="M45.977 52.3672C25.553 52.4975 14.5628 63.526 14.1948 84.2682C14.1565 86.3842 15.8432 88.1322 17.9592 88.1705C19.9372 88.0977 21.8193 86.5222 21.8615 84.4062C22.1528 67.8807 29.8348 60.1373 45.977 60.0377C61.9543 60.1412 69.8587 68.1107 70.1423 84.4023C70.1807 86.4953 71.8903 88.1705 73.9757 88.1705H74.0447C76.1607 88.1322 77.8473 86.388 77.8128 84.272C77.4602 63.8288 66.1748 52.5013 45.9808 52.371L45.977 52.3672Z" fill="black"/>
+            </svg>
+          </div>
+          <h1 id="formTitle" class="text-2xl md:text-3xl lg:text-[36px] font-bold text-black text-center" style="font-family: 'Ibarra Real Nova', serif">
+            Welcome to Your Account
+          </h1>
+        </div>
+
+        <!-- Form -->
+        <form id="authForm" novalidate autocomplete="on">
+          <div class="flex flex-col gap-10">
+
+            <!-- Inputs -->
+            <div class="flex flex-col gap-10">
+
+              <!-- Email Field -->
+              <div class="flex flex-col gap-4">
+                <label for="email" class="text-base md:text-lg lg:text-[20px] text-black" style="font-family: 'Inter', sans-serif">
+                  Email
+                </label>
+                <div class="relative">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="Enter your email..."
+                    class="w-full h-[56px] md:h-[60px] bg-[#d8e6fe] rounded-[12px] border border-black/50 px-3 text-[16px] text-black placeholder:text-black/40 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-400 transition-colors"
+                    style="font-family: 'Inter', sans-serif"
+                  />
+                </div>
+                <div id="emailError" class="field-error">Please enter a valid email address.</div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="flex flex-col gap-4">
+                <label for="password" class="text-base md:text-lg lg:text-[20px] text-black" style="font-family: 'Inter', sans-serif">
+                  Password
+                </label>
+                <div class="flex flex-col gap-2">
+                  <div class="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      minlength="6"
+                      autocomplete="current-password"
+                      placeholder="Enter your password..."
+                      class="w-full h-[56px] md:h-[60px] bg-[#d8e6fe] rounded-[12px] border border-black/50 px-3 pr-10 text-[16px] text-black placeholder:text-black/40 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-400 transition-colors"
+                      style="font-family: 'Inter', sans-serif"
+                    />
+                    <button
+                      type="button"
+                      id="togglePassword"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center cursor-pointer"
+                      aria-label="Toggle password visibility"
+                    >
+                      <svg id="eyeIcon" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="#666">
+                        <path id="eyePath" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle id="eyePupil" cx="12" cy="12" r="3" />
+                        <path id="eyeSlash" d="M4.93 4.93l14.14 14.14" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div id="passwordError" class="field-error">Password must be at least 6 characters.</div>
+
+                  <!-- Remember me + Forgot password -->
+                  <div class="flex items-center justify-between w-full mt-1">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        id="rememberMe"
+                        class="w-4 h-4 accent-[#131212] cursor-pointer"
+                      />
+                      <span class="text-[16px] text-black/84" style="font-family: 'Hedvig Letters Sans', sans-serif">
+                        Remember me
+                      </span>
+                    </label>
+                    <a
+                      href="#"
+                      id="forgotPassword"
+                      class="text-[16px] text-[#d5d5d5] text-right hover:text-gray-500 transition-colors no-underline"
+                      style="font-family: 'Inter', sans-serif"
+                    >
+                      Forgot password?
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button + Toggle Mode -->
+            <div class="flex flex-col gap-3">
+              <button
+                type="submit"
+                id="submitBtn"
+                class="w-full h-[56px] md:h-[60px] bg-[#131212] text-white text-xl md:text-[24px] rounded-[12px] hover:bg-black/80 active:scale-[0.98] transition-all cursor-pointer"
+                style="font-family: 'Inter', sans-serif"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                id="toggleMode"
+                class="text-[16px] text-black text-left hover:underline transition-all cursor-pointer bg-transparent border-none p-0"
+                style="font-family: 'Inter', sans-serif"
+              >
+                Create new Account...?
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // ---- DOM refs ----
+      var form = document.getElementById('authForm');
+      var emailInput = document.getElementById('email');
+      var passwordInput = document.getElementById('password');
+      var emailError = document.getElementById('emailError');
+      var passwordError = document.getElementById('passwordError');
+      var rememberMe = document.getElementById('rememberMe');
+      var togglePassword = document.getElementById('togglePassword');
+      var submitBtn = document.getElementById('submitBtn');
+      var formTitle = document.getElementById('formTitle');
+      var toggleMode = document.getElementById('toggleMode');
+      var forgotLink = document.getElementById('forgotPassword');
+      var toast = document.getElementById('toast');
+
+      var isSignUp = false;
+      var toastTimer = null;
+
+      // ---- Load saved email from localStorage ----
+      (function loadSaved() {
+        var saved = localStorage.getItem('rememberedEmail');
+        var checked = localStorage.getItem('rememberMe') === 'true';
+        if (saved && checked) {
+          emailInput.value = saved;
+          rememberMe.checked = true;
+        }
+      })();
+
+      // ---- Toggle password visibility ----
+      var eyeSlash = document.getElementById('eyeSlash');
+      eyeSlash.style.opacity = '1';
+      togglePassword.addEventListener('click', function () {
+        var isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        eyeSlash.style.opacity = isHidden ? '0' : '1';
+      });
+
+      // ---- Real-time validation ----
+      function validateEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+      }
+
+      function validatePassword(value) {
+        return value.trim().length >= 6;
+      }
+
+      function showFieldError(el, show) {
+        if (show) {
+          el.classList.add('visible');
+        } else {
+          el.classList.remove('visible');
+        }
+      }
+
+      function markInputError(input, hasError) {
+        if (hasError) {
+          input.classList.add('input-error');
+        } else {
+          input.classList.remove('input-error');
+        }
+      }
+
+      emailInput.addEventListener('blur', function () {
+        var val = emailInput.value.trim();
+        if (val && !validateEmail(val)) {
+          showFieldError(emailError, true);
+          markInputError(emailInput, true);
+        } else {
+          showFieldError(emailError, false);
+          markInputError(emailInput, false);
+        }
+      });
+
+      emailInput.addEventListener('input', function () {
+        if (emailError.classList.contains('visible')) {
+          var val = emailInput.value.trim();
+          if (validateEmail(val)) {
+            showFieldError(emailError, false);
+            markInputError(emailInput, false);
+          }
+        }
+      });
+
+      passwordInput.addEventListener('blur', function () {
+        var val = passwordInput.value.trim();
+        if (val && !validatePassword(val)) {
+          showFieldError(passwordError, true);
+          markInputError(passwordInput, true);
+        } else {
+          showFieldError(passwordError, false);
+          markInputError(passwordInput, false);
+        }
+      });
+
+      passwordInput.addEventListener('input', function () {
+        if (passwordError.classList.contains('visible')) {
+          var val = passwordInput.value.trim();
+          if (validatePassword(val)) {
+            showFieldError(passwordError, false);
+            markInputError(passwordInput, false);
+          }
+        }
+      });
+
+      // ---- Toast helper ----
+      function showToast(message, type) {
+        toast.textContent = message;
+        toast.className = 'toast ' + type;
+        // Force reflow
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // ---- Toggle Sign In / Sign Up ----
+      function setMode(signUp) {
+        isSignUp = signUp;
+        if (signUp) {
+          formTitle.textContent = 'Create an Account';
+          submitBtn.textContent = 'Sign Up';
+          toggleMode.textContent = 'Already have an account...? Sign In';
+          passwordInput.setAttribute('autocomplete', 'new-password');
+        } else {
+          formTitle.textContent = 'Welcome to Sign in Your Account';
+          submitBtn.textContent = 'Sign in';
+          toggleMode.textContent = 'Create new Account...?';
+          passwordInput.setAttribute('autocomplete', 'current-password');
+        }
+        // Clear errors on mode switch
+        showFieldError(emailError, false);
+        showFieldError(passwordError, false);
+        markInputError(emailInput, false);
+        markInputError(passwordInput, false);
+      }
+
+      toggleMode.addEventListener('click', function () {
+        setMode(!isSignUp);
+      });
+
+      // ---- Forgot password ----
+      forgotLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        showToast('Password reset link sent to your email.', 'success');
+      });
+
+      // ---- Form submission ----
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var email = emailInput.value.trim();
+        var password = passwordInput.value.trim();
+
+        // Validate
+        var valid = true;
+
+        if (!email) {
+          showFieldError(emailError, true);
+          markInputError(emailInput, true);
+          valid = false;
+        } else if (!validateEmail(email)) {
+          showFieldError(emailError, true);
+          markInputError(emailInput, true);
+          valid = false;
+        } else {
+          showFieldError(emailError, false);
+          markInputError(emailInput, false);
+        }
+
+        if (!password) {
+          showFieldError(passwordError, true);
+          markInputError(passwordInput, true);
+          valid = false;
+        } else if (!validatePassword(password)) {
+          showFieldError(passwordError, true);
+          markInputError(passwordInput, true);
+          valid = false;
+        } else {
+          showFieldError(passwordError, false);
+          markInputError(passwordInput, false);
+        }
+
+        if (!valid) return;
+
+        // Handle Remember Me
+        if (rememberMe.checked) {
+          localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberedEmail');
+          localStorage.setItem('rememberMe', 'false');
+        }
+
+        // Sign Up / Sign In logic
+        if (isSignUp) {
+          // Check if user already exists
+          var existing = localStorage.getItem('user_' + email);
+          if (existing) {
+            showToast('An account with this email already exists. Please sign in.', 'error');
+            return;
+          }
+          // Save new user (in production this would be a server call)
+          var userData = JSON.stringify({ email: email, password: password, createdAt: new Date().toISOString() });
+          localStorage.setItem('user_' + email, userData);
+          showToast('Account created successfully! You can now sign in.', 'success');
+          // Switch to sign in mode
+          var wasRemembered = rememberMe.checked;
+          setMode(false);
+          form.reset();
+          if (wasRemembered) {
+            rememberMe.checked = true;
+            emailInput.value = email;
+          }
+        } else {
+          // Sign In
+          var savedUser = localStorage.getItem('user_' + email);
+          if (!savedUser) {
+            showToast('No account found with this email. Please create a new account.', 'error');
+            return;
+          }
+          var user = JSON.parse(savedUser);
+          if (user.password !== password) {
+            showToast('Incorrect password. Please try again.', 'error');
+            return;
+          }
+          showToast('Welcome back, ' + email.split('@')[0] + '!', 'success');
+          setTimeout(function () {
+            window.location.href = 'dashboard.html';
+          }, 800);
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>

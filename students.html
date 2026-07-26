@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Students | BANO QABIL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:wght@700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    .sidebar-link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .sidebar-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .sidebar-link.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+    .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .dark-mode main {
+      background-color: #0d0d1a;
+    }
+    .dark-mode #welcomeBox {
+      background-color: #1a1a30;
+    }
+    .dark-mode #welcomeBox,
+    .dark-mode #welcomeBox * {
+      color: white !important;
+    }
+    .att-session-badge { display: none!important; align-items: center; gap: 5px; padding: 2px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; background: #dcfce7; color: #16a34a; font-family: 'Inter', sans-serif; }
+    .att-session-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #16a34a; display: inline-block; flex-shrink: 0; }
+    .dark-mode .att-session-badge { background: #064e3b; color: #6ee7b7; }
+    .dark-mode .att-session-badge::before { background: #6ee7b7; }
+    .dark-mode main .bg-white {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode main .text-black,
+    .dark-mode main .text-black\/50,
+    .dark-mode main .text-black\/60,
+    .dark-mode main .text-black\/40 {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode .bg-\[\#D8E6FE\] {
+      background-color: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode .bg-\[\#D8E6FE\] .text-black,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/50,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/60,
+    .dark-mode .bg-\[\#D8E6FE\] .text-black\/70 {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode .bg-\[\#D8E6FE\] .text-lg,
+    .dark-mode .bg-\[\#D8E6FE\] .text-sm {
+      color: rgba(255,255,255,0.85) !important;
+    }
+    .dark-mode input::placeholder,
+    .dark-mode select::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+    .modal-overlay {: 0 8px 24px rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.06);
+      z-index: 50;
+      min-width: 160px;
+      overflow: hidden;
+    }
+    .dark-mode .more-dropdown {
+      background: #1a1a30;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .dark-mode .more-dropdown button {
+      color: rgba(255,255,255,0.85);
+    }
+    .dark-mode .more-dropdown button:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    .dark-mode .more-dropdown .text-red-600 {
+      color: #f87171 !important;
+    }
+    .dark-mode .more-dropdown button:hover.text-red-600 {
+      background: rgba(255,50,50,0.15) !important;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      width: 90%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .dark-mode .modal-box {
+      background: #1a1a30;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .dark-mode .modal-box input,
+    .dark-mode .modal-box select {
+      background: #0d0d1a;
+      color: white;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .dark-mode .modal-box label {
+      color: rgba(255,255,255,0.85);
+    }
+
+    .sort-icon { display: inline-block; margin-left: 4px; color: #bcbcbc; font-size: 11px; transition: color 0.2s; }
+    .sort-icon.active { color: #2563eb; }
+    .th-sortable { cursor: pointer; user-select: none; }
+    .th-sortable:hover { background: rgba(0,0,0,0.04); }
+
+    .pagination-btn {
+      padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      background: transparent; font-family: 'Inter', sans-serif; font-size: 13px;
+      color: #374151; cursor: pointer; transition: all 0.2s ease;
+    }
+    .pagination-btn:hover { background: #f3f4f6; }
+    .pagination-btn.active { background: #D5D5D5; color: #131212; border-color: #D5D5D5; }
+    .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #131212; color: white;
+      padding: 14px 24px; border-radius: 12px; font-family: 'Inter', sans-serif;
+      font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 200;
+      transform: translateY(80px); opacity: 0; transition: all 0.35s ease;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .dark-mode .toast { background: #2563eb; }
+    .dark-mode .sort-icon { color: rgba(255,255,255,0.4); }
+    .dark-mode .sort-icon.active { color: #60a5fa; }
+    .dark-mode .pagination-btn { color: rgba(255,255,255,0.7) !important; border-color: rgba(255,255,255,0.15) !important; }
+    .dark-mode .pagination-btn:hover { background: rgba(255,255,255,0.08) !important; }
+    .dark-mode .pagination-btn.active { background: #D5D5D5 !important; color: #131212 !important; border-color: #D5D5D5 !important; }
+
+    /* Sidebar Toggle */
+    .sidebar-collapsed .sidebar { width: 80px !important; min-width: 80px !important; }
+    .sidebar-collapsed .sidebar .logo-text,
+    .sidebar-collapsed .sidebar .nav-label,
+    .sidebar-collapsed .sidebar .bottom-label,
+    .sidebar-collapsed .sidebar .team-text,
+    .sidebar-collapsed .sidebar .sub-text { display: none !important; }
+    .sidebar-collapsed .sidebar .logo-img { width: 40px !important; height: 40px !important; }
+    .sidebar-collapsed .sidebar .logo-wrap { padding: 16px 0 12px !important; }
+    .sidebar-collapsed .sidebar .sidebar-link { justify-content: center; padding: 12px 0; }
+    .sidebar-collapsed .sidebar .sidebar-link svg { width: 22px; height: 22px; }
+    .sidebar-collapsed .sidebar .logout-section { align-items: center; }
+    .sidebar-collapsed .sidebar .logout-section button { justify-content: center; padding: 12px 0; }
+    .sidebar-collapsed .sidebar .logout-section button svg { width: 22px; height: 22px; }
+    .sidebar-collapsed .sidebar .nav-wrap { padding: 12px 8px; }
+    .sidebar-collapsed .sidebar .logo-circle { width: 40px; height: 40px; }
+    .sidebar { transition: width 0.3s ease, min-width 0.3s ease; }
+    .sidebar .sidebar-link { transition: all 0.3s ease; position: relative; }
+    .sidebar-collapsed .sidebar .sidebar-link[title]:hover::after {
+      content: attr(title);
+      position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+      background: #131212; color: white; padding: 6px 12px; border-radius: 8px;
+      font-size: 12px; font-family: 'Inter', sans-serif; white-space: nowrap;
+      z-index: 60; margin-left: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 40;
+    }
+    .sidebar-overlay.show { display: block; }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: -260px; z-index: 50; transition: left 0.3s ease; }
+      .sidebar.mobile-open { left: 0; }
+      .sidebar-collapsed .sidebar { left: -260px; }
+      .sidebar-collapsed .sidebar.mobile-open { left: 0; width: 260px !important; min-width: 260px !important; }
+      .sidebar-collapsed .sidebar.mobile-open .logo-text,
+      .sidebar-collapsed .sidebar.mobile-open .nav-label { display: block !important; }
+      .sidebar-collapsed .sidebar.mobile-open .sidebar-link { justify-content: flex-start; padding: 12px 20px; }
+      .sidebar-collapsed .sidebar.mobile-open .sidebar-link svg { width: 20px; height: 20px; }
+    }
+
+    /* Grid View */
+    #gridContainer {
+      display: none;
+    }
+    .view-grid #gridContainer { display: grid; }
+    .view-grid #studentTableWrap { display: none; }
+    .student-card {
+      background: white; border-radius: 16px; padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s ease; animation: cardFadeIn 0.35s ease;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .student-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+    @keyframes cardFadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    .student-card .avatar {
+      width: 64px; height: 64px; border-radius: 50%; background: #e5e7eb;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px; overflow: hidden;
+    }
+    .student-card .avatar svg { width: 32px; height: 32px; color: #9ca3af; }
+    .student-card .card-name { font-weight: 600; font-size: 15px; color: #131212; margin-bottom: 2px; }
+    .student-card .card-id { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 8px; }
+    .student-card .card-divider { width: 100%; height: 1px; background: rgba(0,0,0,0.06); margin: 8px 0; }
+    .student-card .card-info { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: 12px; color: rgba(0,0,0,0.6); margin-bottom: 8px; }
+    .student-card .card-info span { display: flex; align-items: center; gap: 4px; }
+    .student-card .card-actions { display: flex; gap: 6px; margin-top: 6px; }
+    .student-card .card-actions button {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.05);
+    }
+    .student-card .card-actions button:hover { transform: scale(1.15); }
+    .student-card .card-actions .card-edit:hover { background: rgba(37,99,235,0.12); color: #2563eb; }
+    .student-card .card-actions .card-trash:hover { background: rgba(220,38,38,0.12); color: #dc2626; }
+    .student-card .card-actions .card-restore:hover { background: rgba(16,185,129,0.12); color: #10b981; }
+
+    .dark-mode .student-card { background: #1a1a30; border-color: rgba(255,255,255,0.08); }
+    .dark-mode .student-card .card-name { color: rgba(255,255,255,0.9); }
+    .dark-mode .student-card .card-id { color: rgba(255,255,255,0.4); }
+    .dark-mode .student-card .card-info { color: rgba(255,255,255,0.55); }
+    .dark-mode .student-card .card-divider { background: rgba(255,255,255,0.06); }
+    .dark-mode .student-card .avatar { background: rgba(255,255,255,0.08); }
+    .dark-mode .student-card .avatar svg { color: rgba(255,255,255,0.3); }
+    .dark-mode .student-card .card-actions button { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+    .dark-mode .student-card .card-actions button:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen w-full flex">
+
+<!-- Sidebar -->
+<aside class="w-[220px] min-h-screen bg-[#131212] flex flex-col shrink-0">
+      <div class="flex flex-col items-center gap-2 px-6 pt-8 pb-6 border-b border-white/10">
+        <div class="w-16 h-16 md:w-[72px] md:h-[72px] relative shrink-0">
+          <img
+            src="src/Images/b6992fb263e6ca7097b6bce9321d2927f95f139f.png"
+            alt="Bano Qabil"
+            class="absolute inset-0 w-full h-full object-contain"
+            onerror="var p=this.parentElement;this.remove();var d=document.createElement('div');d.className='w-full h-full flex items-center justify-center bg-[#1a1a2e] rounded-full';d.textContent='BQ';d.style.cssText='font-size:28px;color:white;font-weight:700;font-family:&quot;Ibarra Real Nova&quot;,serif;display:flex;align-items:center;justify-content:center;width:100%;height:100%';p.appendChild(d)" />
+        </div>
+        <div class="text-center">
+          <p class="text-sm font-bold text-white leading-tight" style="font-family: 'Ibarra Real Nova', serif">BANO QABIL</p>
+          <p class="text-[11px] text-white/50 leading-tight" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+        </div>
+      </div>
+      <nav class="flex flex-col gap-1 px-3 py-6 flex-1">
+        <a href="dashboard.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="timetable.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span>Timetable</span>
+        </a>
+        <a href="classes.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span>Classes</span>
+        </a>
+        <a href="students.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="attendance.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>Attendance</span>
+        </a>
+        <a href="sessions.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>Session</span>
+        </a>
+        <a href="trash.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          <span>Trash</span>
+        </a>
+      </nav>
+      <div class="px-3 pb-5 border-t border-white/10 pt-4 flex flex-col gap-3">
+        <button id="logoutBtn" class="sidebar-link w-full cursor-pointer bg-transparent border-none text-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+        <div class="flex flex-col items-center pt-1">
+          <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mb-1.5">
+            <svg class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <p class="text-[12px] font-semibold text-white/60 tracking-wider uppercase" style="font-family: 'Inter', sans-serif">Team E Project</p>
+          <p class="text-[9px] text-white/30 mt-0.5 tracking-wide" style="font-family: 'Inter', sans-serif">Attendance Management System</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 bg-[#f5f5f5] min-h-screen p-4">
+
+      <!-- Top Welcome Box -->
+      <div id="welcomeBox" class="bg-[#D5D5D5] rounded-[16px] p-5 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-5">
+          <div class="w-[84px] h-[84px] flex items-center justify-center shrink-0">
+            <img src="src/Images/graduation-cap (1).png" alt="Graduation Cap" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <p class="text-[36px] font-bold text-[#131212] leading-tight" style="font-family: 'Ibarra Real Nova', serif">Welcome Admin</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Session: 03</p>
+              <span id="activeSessionBadge" class="att-session-badge hidden"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <button id="toggleModeBtn" class="w-[40px] h-[40px] rounded-full bg-[#131212] flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" aria-label="Toggle dark mode">
+            <svg id="modeIcon" class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#131212]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <p id="currentDate" class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Student Button Section -->
+      <div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex items-center justify-between mb-3">
+        <div>
+          <p class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Manage Students</p>
+          <p class="text-sm text-[#131212]/60" style="font-family: 'Inter', sans-serif">Add, edit and organize your students</p>
+        </div>
+        <button id="addStudentBtn" class="bg-[#131212] text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add New Student
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="bg-[#D8E6FE] rounded-[16px] p-4 shadow-sm border border-black/5 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3 flex-1">
+          <svg class="w-5 h-5 text-black/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input id="searchInput" type="text" placeholder="Search by Name or ID..." class="bg-transparent border-none outline-none text-sm text-black w-full" style="font-family: 'Inter', sans-serif" />
+          <svg id="sidebarToggleBtn" class="w-5 h-5 text-black/50 shrink-0 cursor-pointer hover:text-black transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="button" tabindex="0" aria-label="Toggle sidebar">
+            <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+          <svg id="viewToggleBtn" class="w-5 h-5 text-black/50 shrink-0 cursor-pointer hover:text-black transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="button" tabindex="0" aria-label="Toggle view">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Student Table -->
+      <div id="studentTableWrap">
+        <div class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 overflow-hidden">
+        <div id="emptyPlaceholder" class="flex flex-col items-center justify-center py-16">
+          <svg class="w-16 h-16 text-black/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+          </svg>
+          <p class="text-sm text-black/40 text-center" style="font-family: 'Inter', sans-serif">No data available</p>
+        </div>
+        <table id="studentTable" class="w-full hidden">
+          <thead>
+            <tr class="bg-[#D5D5D5] text-left">
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="0">#<span class="sort-icon" data-col="0">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="1">Student Name<span class="sort-icon" data-col="1">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="2">Student ID<span class="sort-icon" data-col="2">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="3">Time<span class="sort-icon" data-col="3">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="4">Day<span class="sort-icon" data-col="4">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="5">Subject<span class="sort-icon" data-col="5">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="6">Gender<span class="sort-icon" data-col="6">&#9650;</span></th>
+              <th class="th-sortable px-4 py-3 text-sm font-semibold text-black/70" style="font-family: 'Inter', sans-serif" data-col="7">Contact<span class="sort-icon" data-col="7">&#9650;</span></th>
+              <th class="px-4 py-3 text-sm font-semibold text-black/70 text-center" style="font-family: 'Inter', sans-serif">Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Grid Container -->
+    <div id="gridContainer" class="bg-[#D8E6FE] rounded-[16px] shadow-sm border border-black/5 p-4">
+      <div id="gridCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationBar" class="flex items-center justify-between mt-4" style="display:none">
+      <p id="paginationInfo" class="text-sm text-black/50" style="font-family: 'Inter', sans-serif"></p>
+      <div class="flex items-center gap-2">
+        <button id="prevPageBtn" class="pagination-btn" disabled>Previous</button>
+        <div id="pageNumbers" class="flex items-center gap-1"></div>
+        <button id="nextPageBtn" class="pagination-btn">Next</button>
+      </div>
+    </div>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+    <span id="toastMessage">Success!</span>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="bg-[#D8E6FE] rounded-xl px-4 py-3 flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+          <p id="modalTitle" class="text-lg font-bold text-[#131212]" style="font-family: 'Ibarra Real Nova', serif">Add New Student</p>
+        </div>
+        <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all cursor-pointer">
+          <svg class="w-4 h-4 text-black/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="studentForm" class="flex flex-col gap-4" onsubmit="return false">
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Student Name</label>
+          <input id="inputStudentName" type="text" placeholder="name" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Student ID</label>
+          <input id="inputStudentId" type="text" placeholder="e.g. STU-001" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Time</label>
+          <input id="inputTime" type="text" placeholder="e.g. 10:00 AM - 12:00 PM" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Day</label>
+          <input id="inputDay" type="text" placeholder="e.g. Monday, Wednesday" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Subject</label>
+          <select id="inputSubject" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif"><option value="">Select Subject/Class</option></select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Gender</label>
+          <select id="inputGender" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-black/70 mb-1.5 block" style="font-family: 'Inter', sans-serif">Contact No</label>
+          <input id="inputContact" type="text" placeholder="e.g. 03XX-XXXXXXX" required class="w-full px-4 py-2.5 rounded-xl border border-black/10 bg-white text-sm text-black outline-none focus:border-black/30 transition-all" style="font-family: 'Inter', sans-serif" />
+        </div>
+      </form>
+
+      <button id="createClassBtn" class="w-full mt-6 bg-[#131212] text-white py-3 rounded-full text-sm font-semibold hover:opacity-80 transition-all cursor-pointer" style="font-family: 'Inter', sans-serif">
+        Add Student
+      </button>
+    </div>
+  </div>
+
+<script>
+    // ============================================================
+    // DATE
+    // ============================================================
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // ============================================================
+    // DATA LAYER
+    // ============================================================
+    var DEFAULT_STUDENTS = [
+      { name: 'Hamza Ali', id: '615123', day: 'Mon-Tue', time: '8:00-10:00 AM', subject: 'Graphic Designing', gender: 'Male', contact: '0300-1234567' },
+      { name: 'Usman Ali', id: '615124', day: 'Wed-Thu', time: '10:00-12:00 AM', subject: 'Frontend Development', gender: 'Male', contact: '0301-2345678' },
+      { name: 'Ahmad', id: '615125', day: 'Sat-Sun', time: '12:00-2:00 PM', subject: 'Backend Development', gender: 'Male', contact: '0302-3456789' },
+      { name: 'Mazhar', id: '615126', day: 'Mon-Tue', time: '2:00-4:00 PM', subject: 'UI UX Design', gender: 'Male', contact: '0303-4567890' },
+      { name: 'Kumail', id: '615127', day: 'Wed-Thu', time: '8:00-10:00 AM', subject: 'Flutter', gender: 'Male', contact: '0304-5678901' },
+      { name: 'Aayan', id: '615128', day: 'Sat-Sun', time: '10:00-12:00 AM', subject: 'React JS', gender: 'Male', contact: '0305-6789012' },
+      { name: 'Asghar', id: '615129', day: 'Mon-Tue', time: '12:00-2:00 PM', subject: 'Graphic Designing', gender: 'Male', contact: '0306-7890123' },
+      { name: 'Aslam', id: '615130', day: 'Wed-Thu', time: '2:00-4:00 PM', subject: 'Frontend Development', gender: 'Male', contact: '0307-8901234' },
+      { name: 'Mehmood', id: '615131', day: 'Sat-Sun', time: '8:00-10:00 AM', subject: 'Backend Development', gender: 'Male', contact: '0308-9012345' },
+      { name: 'Azhar', id: '615132', day: 'Mon-Tue', time: '10:00-12:00 AM', subject: 'UI UX Design', gender: 'Male', contact: '0309-0123456' },
+      { name: 'Annas', id: '615133', day: 'Wed-Thu', time: '12:00-2:00 PM', subject: 'Flutter', gender: 'Male', contact: '0310-1234567' },
+      { name: 'Abdullah', id: '615134', day: 'Sat-Sun', time: '2:00-4:00 PM', subject: 'React JS', gender: 'Male', contact: '0311-2345678' },
+      { name: 'Ali', id: '615135', day: 'Mon-Tue', time: '8:00-10:00 AM', subject: 'Graphic Designing', gender: 'Male', contact: '0312-3456789' },
+      { name: 'Fatima', id: '615136', day: 'Wed-Thu', time: '10:00-12:00 AM', subject: 'Frontend Development', gender: 'Female', contact: '0313-4567890' },
+      { name: 'Ayesha', id: '615137', day: 'Sat-Sun', time: '12:00-2:00 PM', subject: 'Backend Development', gender: 'Female', contact: '0314-5678901' },
+      { name: 'Zainab', id: '615138', day: 'Mon-Tue', time: '2:00-4:00 PM', subject: 'UI UX Design', gender: 'Female', contact: '0315-6789012' },
+      { name: 'Hassan', id: '615139', day: 'Wed-Thu', time: '8:00-10:00 AM', subject: 'Flutter', gender: 'Male', contact: '0316-7890123' },
+      { name: 'Hussain', id: '615140', day: 'Sat-Sun', time: '10:00-12:00 AM', subject: 'React JS', gender: 'Male', contact: '0317-8901234' },
+      { name: 'Bilal', id: '615141', day: 'Mon-Tue', time: '12:00-2:00 PM', subject: 'Graphic Designing', gender: 'Male', contact: '0318-9012345' },
+      { name: 'Umar', id: '615142', day: 'Wed-Thu', time: '2:00-4:00 PM', subject: 'Frontend Development', gender: 'Male', contact: '0319-0123456' },
+      { name: 'Sara', id: '615143', day: 'Sat-Sun', time: '8:00-10:00 AM', subject: 'Backend Development', gender: 'Female', contact: '0320-1234567' },
+      { name: 'Hira', id: '615144', day: 'Mon-Tue', time: '10:00-12:00 AM', subject: 'UI UX Design', gender: 'Female', contact: '0321-2345678' },
+      { name: 'Mahnoor', id: '615145', day: 'Wed-Thu', time: '12:00-2:00 PM', subject: 'Flutter', gender: 'Female', contact: '0322-3456789' },
+      { name: 'Taha', id: '615146', day: 'Sat-Sun', time: '2:00-4:00 PM', subject: 'React JS', gender: 'Male', contact: '0323-4567890' },
+      { name: 'Rayan', id: '615147', day: 'Mon-Tue', time: '8:00-10:00 AM', subject: 'Graphic Designing', gender: 'Male', contact: '0324-5678901' },
+      { name: 'Ibrahim', id: '615148', day: 'Wed-Thu', time: '10:00-12:00 AM', subject: 'Frontend Development', gender: 'Male', contact: '0325-6789012' },
+      { name: 'Zara', id: '615149', day: 'Sat-Sun', time: '12:00-2:00 PM', subject: 'Backend Development', gender: 'Female', contact: '0326-7890123' },
+      { name: 'Eman', id: '615150', day: 'Mon-Tue', time: '2:00-4:00 PM', subject: 'UI UX Design', gender: 'Female', contact: '0327-8901234' },
+    ];
+
+    var studentsData = [];
+    var filteredStudents = [];
+    var currentPage = 1;
+    var perPage = 10;
+    var sortCol = -1;
+    var sortAsc = true;
+    var editingIndex = -1;
+    var searchQuery = '';
+
+    function loadStudents() {
+      var raw = localStorage.getItem('studentsData');
+      if (raw) { studentsData = JSON.parse(raw); }
+      else { studentsData = DEFAULT_STUDENTS.map(function(s){return Object.assign({},s);}); saveStudents(); }
+      filteredStudents = [].concat(studentsData);
+    }
+    function saveStudents() { localStorage.setItem('studentsData', JSON.stringify(studentsData)); }
+    function loadTrash() { var r = localStorage.getItem('trashData'); return r ? JSON.parse(r) : []; }
+    function saveTrash(d) { localStorage.setItem('trashData', JSON.stringify(d)); }
+
+    function renderStudentsTable() {
+      applySort();
+      var total = filteredStudents.length;
+      var tbody = document.getElementById('studentTableBody');
+      var table = document.getElementById('studentTable');
+      var placeholder = document.getElementById('emptyPlaceholder');
+      if (total === 0) {
+        table.classList.add('hidden'); placeholder.style.display = 'flex'; tbody.innerHTML = '';
+        document.getElementById('paginationBar').style.display = 'none'; return;
+      }
+      table.classList.remove('hidden'); placeholder.style.display = 'none';
+      var totalPages = Math.ceil(total / perPage);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+      var start = (currentPage - 1) * perPage;
+      var end = Math.min(start + perPage, total);
+      var pageData = filteredStudents.slice(start, end);
+      tbody.innerHTML = '';
+      for (var i = 0; i < pageData.length; i++) {
+        var s = pageData[i];
+        var row = document.createElement('tr');
+        row.className = 'border-t border-black/5 hover:bg-black/5 transition-all';
+        row.innerHTML =
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + (start + i + 1) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.name) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.id) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.time) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.day) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.subject) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.gender) + '</td>' +
+          '<td class="px-4 py-3 text-sm text-black/70" style="font-family: \'Inter\', sans-serif">' + esc(s.contact) + '</td>' +
+          '<td class="px-4 py-3 text-center"><div class="flex items-center justify-center gap-1">' +
+            '<button class="edit-btn w-7 h-7 rounded-full hover:bg-black/10 flex items-center justify-center transition-all cursor-pointer" title="Edit / Update" type="button" data-idx="' + (start + i) + '">' +
+              '<svg class="w-3.5 h-3.5 text-black/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+            '</button>' +
+            '<button class="trash-btn w-7 h-7 rounded-full hover:bg-red-100 flex items-center justify-center transition-all cursor-pointer" title="Move to Trash" type="button" data-idx="' + (start + i) + '">' +
+              '<svg class="w-3.5 h-3.5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button></div></td>';
+        tbody.appendChild(row);
+      }
+      var totalPages2 = Math.ceil(total / perPage);
+      updatePagination(totalPages2, start, end, total);
+    }
+
+    function esc(str) { var d = document.createElement('div'); d.appendChild(document.createTextNode(str)); return d.innerHTML; }
+
+    function updatePagination(tp, start, end, total) {
+      var bar = document.getElementById('paginationBar');
+      var info = document.getElementById('paginationInfo');
+      var pn = document.getElementById('pageNumbers');
+      var pb = document.getElementById('prevPageBtn');
+      var nb = document.getElementById('nextPageBtn');
+      if (total === 0) { bar.style.display = 'none'; return; }
+      bar.style.display = 'flex';
+      info.textContent = 'Showing ' + (start + 1) + '-' + end + ' of ' + total;
+      pb.disabled = currentPage <= 1; nb.disabled = currentPage >= tp;
+      pn.innerHTML = '';
+      var sp = Math.max(1, currentPage - 2);
+      var ep = Math.min(tp, currentPage + 2);
+      if (sp > 1) { addPageNum(1, pn); if (sp > 2) addDots(pn); }
+      for (var i = sp; i <= ep; i++) addPageNum(i, pn);
+      if (ep < tp) { if (ep < tp - 1) addDots(pn); addPageNum(tp, pn); }
+    }
+
+    function addPageNum(p, parent) {
+      var b = document.createElement('button');
+      b.className = 'pagination-btn' + (p === currentPage ? ' active' : '');
+      b.textContent = p;
+      b.addEventListener('click', function () { currentPage = p; rerenderCurrentView(); });
+      parent.appendChild(b);
+    }
+    function addDots(parent) { var d = document.createElement('span'); d.className = 'px-2 text-sm text-black/40'; d.textContent = '...'; parent.appendChild(d); }
+
+    document.getElementById('searchInput').addEventListener('input', function () { searchQuery = this.value.trim().toLowerCase(); filterStudents(); });
+
+    function filterStudents() {
+      if (!searchQuery) { filteredStudents = [].concat(studentsData); }
+      else {
+        filteredStudents = studentsData.filter(function (s) {
+          return s.name.toLowerCase().indexOf(searchQuery) !== -1 || s.id.toLowerCase().indexOf(searchQuery) !== -1;
+        });
+      }
+      currentPage = 1; rerenderCurrentView();
+    }
+
+    document.querySelectorAll('.th-sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var col = parseInt(th.getAttribute('data-col'));
+        if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
+        rerenderCurrentView();
+      });
+    });
+
+    function applySort() {
+      if (sortCol === -1) return;
+      var keys = ['id', 'name', 'id', 'day', 'time', 'subject', 'gender', 'contact'];
+      var key = keys[sortCol] || 'name'; if (sortCol === 0) key = 'id';
+      filteredStudents.sort(function (a, b) {
+        var va = (a[key] || '').toLowerCase(), vb = (b[key] || '').toLowerCase();
+        if (va < vb) return sortAsc ? -1 : 1; if (va > vb) return sortAsc ? 1 : -1; return 0;
+      });
+    }
+
+    function populateSubjectDropdown() {
+      var classes = [];
+      try { classes = JSON.parse(localStorage.getItem('classesData')) || []; } catch(e) {}
+      var sel = document.getElementById('inputSubject');
+      sel.innerHTML = '<option value="">Select Subject/Class</option>';
+      for (var i = 0; i < classes.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = classes[i].name;
+        opt.textContent = classes[i].name;
+        sel.appendChild(opt);
+      }
+    }
+
+    var addStudentBtn = document.getElementById('addStudentBtn');
+    var closeModalBtn = document.getElementById('closeModalBtn');
+    var modalOverlay = document.getElementById('modalOverlay');
+    var modalTitle = document.getElementById('modalTitle');
+    var submitBtn = document.getElementById('createClassBtn');
+
+    addStudentBtn.addEventListener('click', function () {
+      editingIndex = -1;
+      document.getElementById('studentForm').reset();
+      populateSubjectDropdown();
+      submitBtn.textContent = 'Add Student'; modalTitle.textContent = 'Add New Student';
+      modalOverlay.classList.add('show');
+    });
+
+    closeModalBtn.addEventListener('click', function () { modalOverlay.classList.remove('show'); editingIndex = -1; });
+    modalOverlay.addEventListener('click', function (e) { if (e.target === modalOverlay) { modalOverlay.classList.remove('show'); editingIndex = -1; } });
+
+    submitBtn.addEventListener('click', function () {
+      var form = document.getElementById('studentForm');
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      var s = {
+        name: document.getElementById('inputStudentName').value.trim(),
+        id: document.getElementById('inputStudentId').value.trim(),
+        day: document.getElementById('inputDay').value.trim(),
+        time: document.getElementById('inputTime').value.trim(),
+        subject: document.getElementById('inputSubject').value.trim(),
+        gender: document.getElementById('inputGender').value,
+        contact: document.getElementById('inputContact').value.trim()
+      };
+      if (editingIndex >= 0) { studentsData[editingIndex] = s; }
+      else { studentsData.push(s); }
+      saveStudents();
+      filterStudents();
+      form.reset();
+      modalOverlay.classList.remove('show');
+      editingIndex = -1;
+    });
+
+    document.getElementById('studentTableBody').addEventListener('click', function (e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      if (btn.classList.contains('edit-btn')) {
+        var idx = parseInt(btn.getAttribute('data-idx'));
+        var s = filteredStudents[idx];
+        editingIndex = studentsData.indexOf(s);
+        populateSubjectDropdown();
+        document.getElementById('inputStudentName').value = s.name;
+        document.getElementById('inputStudentId').value = s.id;
+        document.getElementById('inputDay').value = s.day;
+        document.getElementById('inputTime').value = s.time;
+        document.getElementById('inputSubject').value = s.subject;
+        document.getElementById('inputGender').value = s.gender;
+        document.getElementById('inputContact').value = s.contact;
+        submitBtn.textContent = 'Update Student'; modalTitle.textContent = 'Edit Student';
+        modalOverlay.classList.add('show');
+        return;
+      }
+      if (btn.classList.contains('trash-btn')) {
+        var idx = parseInt(btn.getAttribute('data-idx'));
+        var s = filteredStudents[idx];
+        var realIdx = studentsData.indexOf(s);
+        if (confirm('Are you sure you want to move "' + s.name + '" to Trash?')) {
+          studentsData.splice(realIdx, 1);
+          saveStudents();
+          var trash = loadTrash(); trash.push(s); saveTrash(trash);
+          filterStudents();
+          showToast('"' + s.name + '" moved to Trash successfully.');
+        }
+        return;
+      }
+    });
+
+    var toggleModeBtn = document.getElementById('toggleModeBtn');
+    var modeIcon = document.getElementById('modeIcon');
+    var isDark = localStorage.getItem('studentsDarkMode') === 'true';
+    if (isDark) {
+      modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+      document.body.classList.add('dark-mode');
+    }
+    toggleModeBtn.addEventListener('click', function () {
+      isDark = !isDark;
+      if (isDark) {
+        modeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        document.body.classList.add('dark-mode');
+      } else {
+        modeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('studentsDarkMode', isDark);
+    });
+
+    // ============================================================
+    // SIDEBAR TOGGLE
+    // ============================================================
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    var sidebarBtn = document.getElementById('sidebarToggleBtn');
+
+    function collapseSidebar() {
+      document.body.classList.add('sidebar-collapsed');
+    }
+    function expandSidebar() {
+      document.body.classList.remove('sidebar-collapsed');
+    }
+    function toggleSidebarDesktop() {
+      if (document.body.classList.contains('sidebar-collapsed')) {
+        expandSidebar();
+      } else {
+        collapseSidebar();
+      }
+      saveSidebarState();
+    }
+    function saveSidebarState() {
+      localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
+    }
+    function loadSidebarState() {
+      var val = localStorage.getItem('sidebarCollapsed');
+      if (val === 'true') { collapseSidebar(); }
+    }
+
+    function toggleSidebarMobile() {
+      sidebar.classList.toggle('mobile-open');
+      overlay.classList.toggle('show');
+    }
+
+    function closeMobileSidebar() {
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('show');
+    }
+
+    if (sidebarBtn) {
+      var sidebarClickTimer = null;
+      sidebarBtn.addEventListener('click', function () {
+        if (window.innerWidth <= 768) {
+          toggleSidebarMobile();
+        } else {
+          toggleSidebarDesktop();
+        }
+      });
+      sidebarBtn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+      });
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', closeMobileSidebar);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('mobile-open')) {
+          closeMobileSidebar();
+        }
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 768 && sidebar) {
+        sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('show');
+      }
+    });
+
+    // ============================================================
+    // VIEW TOGGLE (Table / Grid)
+    // ============================================================
+    var viewBtn = document.getElementById('viewToggleBtn');
+
+    function toggleView() {
+      document.body.classList.toggle('view-grid');
+      saveViewPreference();
+      if (document.body.classList.contains('view-grid')) {
+        renderGridCards();
+      }
+    }
+
+    function showTableView() {
+      document.body.classList.remove('view-grid');
+      saveViewPreference();
+    }
+
+    function showGridView() {
+      document.body.classList.add('view-grid');
+      saveViewPreference();
+      renderGridCards();
+    }
+
+    function saveViewPreference() {
+      localStorage.setItem('viewMode', document.body.classList.contains('view-grid') ? 'grid' : 'table');
+    }
+
+    function loadViewPreference() {
+      var val = localStorage.getItem('viewMode');
+      if (val === 'grid') { document.body.classList.add('view-grid'); }
+    }
+
+    if (viewBtn) {
+      viewBtn.addEventListener('click', function () { toggleView(); });
+      viewBtn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+      });
+    }
+
+    // ============================================================
+    // GRID CARDS
+    // ============================================================
+    function renderGridCards() {
+      applySort();
+      var container = document.getElementById('gridCards');
+      var gridWrap = document.getElementById('gridContainer');
+      if (!container) return;
+      var total = filteredStudents.length;
+      if (total === 0) {
+        container.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-16"><svg class="w-16 h-16 text-black/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p class="text-sm text-black/40 text-center" style="font-family: \'Inter\', sans-serif">No data available</p></div>';
+        return;
+      }
+      var totalPages = Math.ceil(total / perPage);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+      var start = (currentPage - 1) * perPage;
+      var end = Math.min(start + perPage, total);
+      var pageData = filteredStudents.slice(start, end);
+      var html = '';
+      for (var i = 0; i < pageData.length; i++) {
+        var s = pageData[i];
+        var initial = s.name.charAt(0).toUpperCase();
+        html +=
+          '<div class="student-card" role="article">' +
+            '<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' +
+            '<p class="card-name">' + esc(s.name) + '</p>' +
+            '<p class="card-id">' + esc(s.id) + '</p>' +
+            '<div class="card-divider"></div>' +
+            '<div class="card-info">' +
+              '<span><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' + esc(s.subject) + '</span>' +
+              '<span><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + esc(s.day) + '</span>' +
+              '<span><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + esc(s.time) + '</span>' +
+            '</div>' +
+            '<div class="card-actions">' +
+              '<button class="card-edit edit-btn w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all" title="Edit" type="button" data-idx="' + (start + i) + '">' +
+                '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+              '</button>' +
+              '<button class="card-trash trash-btn w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all" title="Move to Trash" type="button" data-idx="' + (start + i) + '">' +
+                '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    // ============================================================
+    // Event delegation for card actions (same handler for grid)
+    // ============================================================
+    document.getElementById('gridCards').addEventListener('click', function (e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      if (btn.classList.contains('edit-btn')) {
+        var idx = parseInt(btn.getAttribute('data-idx'));
+        var s = filteredStudents[idx];
+        editingIndex = studentsData.indexOf(s);
+        populateSubjectDropdown();
+        document.getElementById('inputStudentName').value = s.name;
+        document.getElementById('inputStudentId').value = s.id;
+        document.getElementById('inputDay').value = s.day;
+        document.getElementById('inputTime').value = s.time;
+        document.getElementById('inputSubject').value = s.subject;
+        document.getElementById('inputGender').value = s.gender;
+        document.getElementById('inputContact').value = s.contact;
+        submitBtn.textContent = 'Update Student'; modalTitle.textContent = 'Edit Student';
+        modalOverlay.classList.add('show');
+        return;
+      }
+      if (btn.classList.contains('trash-btn')) {
+        var idx = parseInt(btn.getAttribute('data-idx'));
+        var s = filteredStudents[idx];
+        var realIdx = studentsData.indexOf(s);
+        if (confirm('Are you sure you want to move "' + s.name + '" to Trash?')) {
+          studentsData.splice(realIdx, 1);
+          saveStudents();
+          var trash = loadTrash(); trash.push(s); saveTrash(trash);
+          filterStudents();
+          showToast('"' + s.name + '" moved to Trash successfully.');
+        }
+        return;
+      }
+    });
+
+    // ============================================================
+    // Pagination should re-render current view
+    // ============================================================
+    document.getElementById('prevPageBtn').addEventListener('click', function () { if (currentPage > 1) { currentPage--; rerenderCurrentView(); } });
+    document.getElementById('nextPageBtn').addEventListener('click', function () { var tp = Math.ceil(filteredStudents.length / perPage); if (currentPage < tp) { currentPage++; rerenderCurrentView(); } });
+
+    function rerenderCurrentView() {
+      if (document.body.classList.contains('view-grid')) {
+        renderGridCards();
+      } else {
+        renderStudentsTable();
+      }
+    }
+
+    loadStudents();
+    loadSidebarState();
+    loadViewPreference();
+    if (document.body.classList.contains('view-grid')) {
+      renderGridCards();
+    } else {
+      renderStudentsTable();
+    }
+    (function(){var d=localStorage.getItem('activeAttSession');var b=document.getElementById('activeSessionBadge');if(d){try{var s=JSON.parse(d);if(s.active){b.textContent=s.label;b.classList.remove('hidden');}}catch(e){}}})();
+  </script>
+</body>
+</html>
+
+
+
