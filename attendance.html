@@ -305,7 +305,9 @@ function getDateStr(){ var d=new Date(); return d.toISOString().split('T')[0]; }
 function getDateForDay(dayName){ var dayMap={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6}; var target=dayMap[dayName]; if(target===undefined) return getDateStr(); var d=new Date(); var diff=target-d.getDay(); if(diff<0) diff+=7; d.setDate(d.getDate()+diff); return d.toISOString().split('T')[0]; }
 
 function getDisplaySessions(){
-  return sessions.filter(function(s){ return (currentDay==='all'||s.day===currentDay)&&(currentTime==='all'||s.time===currentTime); });
+  return sessions.filter(function(s){
+    return (currentDay==='all'||s.day===currentDay)&&(currentTime==='all'||s.time===currentTime)&&(currentClass==='all'||s.class===currentClass);
+  });
 }
 
 function renderTable(){
@@ -313,7 +315,7 @@ function renderTable(){
   var disp=getDisplaySessions();
   var tbody=document.getElementById('attTableBody');
   var total=filteredStudents.length;
-  var colspan=3+disp.length+2;
+  var colspan=3+(disp.length>0?1:0)+Math.max(0,disp.length-1)+2;
   if(total===0){
     tbody.innerHTML='<tr><td colspan="'+colspan+'" class="text-center py-12 text-sm text-black/40" style="font-family:\'Inter\',sans-serif"><i class="fas fa-users-slash text-3xl block mb-2"></i>No students found</td></tr>';
     updateStats([]); return;
@@ -326,7 +328,13 @@ function renderTable(){
     html+='<td class="text-sm text-black/60" style="font-family:\'Inter\',sans-serif">'+(i+1)+'</td>';
     html+='<td class="text-sm font-medium text-black" style="font-family:\'Inter\',sans-serif">'+esc(s.name)+'</td>';
     html+='<td class="text-sm text-black/60" style="font-family:\'Inter\',sans-serif">'+esc(s.id)+'</td>';
-    for(var d=0;d<disp.length;d++){
+    if(disp.length>0){
+      var firstRec=disp[0].records[s.id]||'P';
+      var firstCls=firstRec==='P'?'present':firstRec==='A'?'absent':'late';
+      var oidx=sessions.indexOf(disp[0]);
+      html+='<td class="text-center"><button class="att-cell '+firstCls+'" data-sid="'+esc(s.id)+'" data-sidx="'+oidx+'">'+firstRec+'</button></td>';
+    }
+    for(var d=disp.length>0?1:0;d<disp.length;d++){
       var rec=disp[d].records[s.id]||'P';
       var cls=rec==='P'?'present':rec==='A'?'absent':'late';
       var oidx=sessions.indexOf(disp[d]);
@@ -343,7 +351,8 @@ function renderHeader(){
   var tr=document.getElementById('attHeaderRow');
   tr.innerHTML='<th style="width:50px">#</th><th style="min-width:140px">Name</th><th style="width:90px">ID</th>';
   var disp=getDisplaySessions();
-  for(var d=0;d<disp.length;d++){
+  if(disp.length>0) tr.innerHTML+='<th style="width:40px">P</th>';
+  for(var d=disp.length>0?1:0;d<disp.length;d++){
     var s=disp[d];
     tr.innerHTML+='<th style="width:80px;font-size:11px;line-height:1.3">'+DAY_LABELS[s.day]+'<br><span style="font-weight:400;font-size:10px">'+s.time+'<br>'+s.date+'</span></th>';
   }
@@ -391,12 +400,23 @@ function toggleAttendanceSession(){
     var day=currentDay,time=currentTime;
     if(day==='all'||time==='all'){ alert('Please select a specific Day and Time from the filters first.'); return; }
     var blockDays=TIMETABLE_BLOCK_DAYS[day]; if(!blockDays){ alert('Invalid day block selected.'); return; }
-    var availableDays=blockDays.filter(function(bd){ return !sessions.some(function(s){ return s.day===bd&&s.time===time; }); });
+    var existing=blockDays.filter(function(bd){ return sessions.some(function(s){ return s.day===bd&&s.time===time&&s.class===currentClass; }); });
+    if(existing.length===blockDays.length){
+      attSessionActive=true;
+      document.getElementById('startAttBtn').innerHTML='<i class="fas fa-stop"></i> Stop Attendance';
+      document.getElementById('startAttBtn').className='attendance-btn danger';
+      document.getElementById('sessionBadge').className='session-badge active';
+      document.getElementById('sessionBadge').innerHTML='<i class="fas fa-circle" style="font-size:8px"></i> Session Active';
+      localStorage.setItem('activeAttSession',JSON.stringify({active:true,day:day,time:time,date:getDateStr(),label:(DAY_LABELS_BLOCK[day]||day)+' '+time}));
+      showToast('Existing session loaded for '+(DAY_LABELS_BLOCK[day]||day)+' at '+time,'info');
+      syncActiveSessionBadge(); renderTable(); return;
+    }
+    var availableDays=blockDays.filter(function(bd){ return !sessions.some(function(s){ return s.day===bd&&s.time===time&&s.class===currentClass; }); });
     if(availableDays.length===0){ alert('All days in this block already have attendance taken for this time.'); return; }
     var students=loadStudents(),filtered=[].concat(students);
     if(currentClass!=='all') filtered=filtered.filter(function(s){ return s.subject===currentClass||s.class===currentClass; });
     if(currentTrainer!=='all') filtered=filtered.filter(function(s){ return s.trainer===currentTrainer; });
-    var sc=0; availableDays.forEach(function(td){ var rec={}; filtered.forEach(function(s){ rec[s.id]='P'; }); sessions.push({id:'att_'+Date.now()+'_'+sc,date:getDateForDay(td),day:td,time:time,records:rec}); sc++; });
+    var sc=0; availableDays.forEach(function(td){ var rec={}; filtered.forEach(function(s){ rec[s.id]='P'; }); sessions.push({id:'att_'+Date.now()+'_'+sc,date:getDateForDay(td),day:td,time:time,class:currentClass,records:rec}); sc++; });
     saveSessions();
     attSessionActive=true;
     document.getElementById('startAttBtn').innerHTML='<i class="fas fa-stop"></i> Stop Attendance';
@@ -539,9 +559,10 @@ function exportCSV(){
   var disp=getDisplaySessions(),rows=generateExportRows();
   if(rows.length===0){ showToast('No data to export','info'); return; }
   var headers='Sr,Name,ID';
-  for(var d=0;d<disp.length;d++) headers+=','+DAY_LABELS[disp[d].day]+'-'+disp[d].time;
+  if(disp.length>0) headers+=',P';
+  for(var d=disp.length>0?1:0;d<disp.length;d++) headers+=','+DAY_LABELS[disp[d].day]+'-'+disp[d].time;
   headers+=',Percentage,Status\n'; var csv=headers;
-  for(var i=0;i<rows.length;i++){ var r=rows[i]; csv+=(i+1)+',"'+r.name+'","'+r.id+'"'; for(var d=0;d<r.days.length;d++) csv+=','+r.days[d]; csv+=','+r.pct+'%,'+r.status+'\n'; }
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; csv+=(i+1)+',"'+r.name+'","'+r.id+'"'; if(disp.length>0) csv+=','+(r.days[0]||'P'); for(var d=disp.length>0?1:0;d<r.days.length;d++) csv+=','+r.days[d]; csv+=','+r.pct+'%,'+r.status+'\n'; }
   downloadFile(csv,'attendance_export.csv','text/csv'); showToast('CSV exported successfully!','success');
 }
 
@@ -551,9 +572,10 @@ function exportExcel(){
   var xml='<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
   xml+='<Worksheet ss:Name="Attendance"><Table>';
   xml+='<Row><Cell><Data ss:Type="String">Sr</Data></Cell><Cell><Data ss:Type="String">Name</Data></Cell><Cell><Data ss:Type="String">ID</Data></Cell>';
-  for(var d=0;d<disp.length;d++) xml+='<Cell><Data ss:Type="String">'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</Data></Cell>';
+  if(disp.length>0) xml+='<Cell><Data ss:Type="String">P</Data></Cell>';
+  for(var d=disp.length>0?1:0;d<disp.length;d++) xml+='<Cell><Data ss:Type="String">'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</Data></Cell>';
   xml+='<Cell><Data ss:Type="String">Percentage</Data></Cell><Cell><Data ss:Type="String">Status</Data></Cell></Row>';
-  for(var i=0;i<rows.length;i++){ var r=rows[i]; xml+='<Row><Cell><Data ss:Type="Number">'+(i+1)+'</Data></Cell><Cell><Data ss:Type="String">'+r.name+'</Data></Cell><Cell><Data ss:Type="String">'+r.id+'</Data></Cell>'; for(var d=0;d<r.days.length;d++) xml+='<Cell><Data ss:Type="String">'+r.days[d]+'</Data></Cell>'; xml+='<Cell><Data ss:Type="String">'+r.pct+'%</Data></Cell><Cell><Data ss:Type="String">'+r.status+'</Data></Cell></Row>'; }
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; xml+='<Row><Cell><Data ss:Type="Number">'+(i+1)+'</Data></Cell><Cell><Data ss:Type="String">'+r.name+'</Data></Cell><Cell><Data ss:Type="String">'+r.id+'</Data></Cell>'; if(disp.length>0) xml+='<Cell><Data ss:Type="String">'+(r.days[0]||'P')+'</Data></Cell>'; for(var d=disp.length>0?1:0;d<r.days.length;d++) xml+='<Cell><Data ss:Type="String">'+r.days[d]+'</Data></Cell>'; xml+='<Cell><Data ss:Type="String">'+r.pct+'%</Data></Cell><Cell><Data ss:Type="String">'+r.status+'</Data></Cell></Row>'; }
   xml+='</Table></Worksheet></Workbook>';
   downloadFile(xml,'attendance_export.xls','application/vnd.ms-excel'); showToast('Excel exported successfully!','success');
 }
@@ -564,9 +586,10 @@ function exportPDF(){
   var h='<html><head><style>body{font-family:Arial,sans-serif;padding:20px}h2{text-align:center;margin-bottom:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;font-size:12px}th{background:#2563eb;color:white}</style></head><body>';
   h+='<h2>Attendance Report</h2>';
   h+='<table><thead><tr><th>Sr</th><th>Name</th><th>ID</th>';
-  for(var d=0;d<disp.length;d++) h+='<th>'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</th>';
+  if(disp.length>0) h+='<th>P</th>';
+  for(var d=disp.length>0?1:0;d<disp.length;d++) h+='<th>'+DAY_LABELS[disp[d].day]+'-'+disp[d].time+'</th>';
   h+='<th>%</th><th>Status</th></tr></thead><tbody>';
-  for(var i=0;i<rows.length;i++){ var r=rows[i]; h+='<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+r.id+'</td>'; for(var d=0;d<r.days.length;d++) h+='<td>'+r.days[d]+'</td>'; h+='<td>'+r.pct+'%</td><td>'+r.status+'</td></tr>'; }
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; h+='<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+r.id+'</td>'; if(disp.length>0) h+='<td>'+(r.days[0]||'P')+'</td>'; for(var d=disp.length>0?1:0;d<r.days.length;d++) h+='<td>'+r.days[d]+'</td>'; h+='<td>'+r.pct+'%</td><td>'+r.status+'</td></tr>'; }
   h+='<'+'/tbody><'+'/table><'+'/body><'+'/html>';
   var win=window.open('','_blank'); win.document.write(h); win.document.close(); win.focus(); win.print();
   showToast('PDF export opened for printing.','info');
