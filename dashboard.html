@@ -327,7 +327,7 @@
   <script>
     var logoutBtn = document.getElementById('logoutBtn');
     logoutBtn.addEventListener('click', function () {
-      window.location.href = 'sign-page.html';
+      window.location.href = 'index.html';
     });
 
     var dateEl = document.getElementById('currentDate');
@@ -438,7 +438,7 @@
       if(classes.length===0){
         container.innerHTML='<div class="col-span-full flex flex-col items-center justify-center py-8"><hr class="w-full border-t border-black/10 mb-4"><svg class="w-12 h-12 text-black/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p class="text-sm text-black/40 text-center" style="font-family:\'Inter\',sans-serif">No data available</p></div>';
       } else {
-        var html='';
+        var html='<hr class="w-full border-t-2 border-black mb-4 col-span-full" />';
         classes.forEach(function(c){
           var cname=c.name||c;
           var count=0; students.forEach(function(s){ if(s.subject===cname||s.class===cname) count++; });
